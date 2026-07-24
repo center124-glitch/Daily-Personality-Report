@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERSONALITY DAILY TEST REPORT</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #f59e0b;
+            --primary-light: #fbbf24;
+            --success: #10b981; 
+            --success-light: #34d399;
+            --danger: #ef4444; 
+            --danger-light: #f87171;
+            --warning: #f59e0b; 
+            --warning-light: #fbbf24;
+            --bg-body: linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fecaca 100%);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-main: #1f2937;
+            --table-head: #f9fafb;
+            --border-color: #e5e7eb;
+            --header-gradient: linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #f59e0b 100%);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #581c87 100%);
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --text-main: #f1f5f9;
+            --table-head: #0f172a;
+            --border-color: #475569;
+            --header-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+        }
+        
+        * { 
+            box-sizing: border-box; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+        }
+        
+        body { 
+            font-family: 'Sarabun', sans-serif;
+            background: var(--bg-body); 
+            background-attachment: fixed;
+            margin: 0; 
+            padding: 10px; 
+            color: var(--text-main); 
+            min-height: 100vh;
+            transition: background 0.5s ease;
+        }
+
+        /* Animated Background Particles */
+        .bg-particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2));
+            animation: float linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        .bg-dots {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: radial-gradient(circle, rgba(245, 158, 11, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px; 
+            opacity: 0.3;
+            animation: dotPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #reportContainer { 
+            max-width: 900px; 
+            margin: auto; 
+            padding: 15px; 
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: var(--header-gradient);
+            padding: 16px 22px;
+            border-radius: 20px;
+            color: white;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+            animation: headerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { box-shadow: 0 10px 40px rgba(245,158,11,0.3); }
+            50%       { box-shadow: 0 10px 60px rgba(236,72,153,0.5); }
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.08), transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0%   { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%)  translateY(100%)  rotate(45deg); }
+        }
+
+        /* ── header left: title + subtitle ── */
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+        }
+
+        .header-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50%       { transform: scale(1.015); }
+        }
+
+        .header-sub {
+            font-size: 0.75rem;
+            font-weight: 600;
+            opacity: 0.85;
+            letter-spacing: 0.3px;
+        }
+
+        /* ── btn-group: เรียงปุ่มสวยงาม ── */
+        .btn-group {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 11.5px;
+            font-family: 'Sarabun', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            transform: translate(-50%,-50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:hover::before { width: 280px; height: 280px; }
+        .btn:hover  { transform: translateY(-2px) scale(1.04); box-shadow: var(--shadow-lg); }
+        .btn:active { transform: translateY(0) scale(0.97); }
+
+        .btn-import { background: linear-gradient(135deg,#6366f1,#8b5cf6); }
+        .btn-reset  { background: linear-gradient(135deg,#ef4444,#dc2626); }
+        .btn-print  { background: linear-gradient(135deg,#1f2937,#111827); }
+        .btn-jpeg   { background: linear-gradient(135deg,#10b981,#059669); }
+        .btn-theme  { background: linear-gradient(135deg,#6b7280,#4b5563); }
+
+        /* ── filter-row ── */
+        .filter-row {
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            font-weight: 700;
+            font-size: 0.9rem;
+            animation: slideRight 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-icon  { font-size: 1rem; line-height: 1; }
+        .filter-label { color: var(--text-main); font-weight: 700; white-space: nowrap; }
+
+        /* วันที่: input date + badge พ.ศ. */
+        .date-input {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:hover, .date-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+        }
+
+        .date-badge {
+            padding: 4px 10px;
+            background: linear-gradient(135deg,var(--primary-light),var(--primary));
+            color: white;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            display: inline-block;
+            box-shadow: var(--shadow-sm);
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .date-badge:hover { transform: scale(1.05); box-shadow: var(--shadow-md); }
+
+        .filter-summary {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+
+        .shift-select {
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.88rem;
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .shift-select:hover, .shift-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+        }
+
+        /* badge แสดงกะที่เลือก (ใช้ใน export) */
+        .shift-badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            color: white;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: var(--shadow-sm);
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        /* toggle กรองข้อมูล */
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            user-select: none;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            width: 15px; height: 15px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .toggle-text { transition: color 0.2s; }
+        .toggle-label:hover .toggle-text { color: var(--primary); }
+
+        .dashboard-row { 
+            display: grid; 
+            grid-template-columns: 1fr 224px; 
+            gap: 15px; 
+            margin-bottom: 20px;
+            animation: slideLeft 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes slideLeft {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+        }
+        
+        /* ─── PRODUCT-STYLE SUMMARY CARDS ───────────────────────────
+           สไตล์การ์ดผลิตภัณฑ์: สีแบรนด์ทึบสดใส ไล่เฉดมันวาว
+           ใช้สีเดียวกันทั้งโหมดมืด/สว่าง (ไม่ผูกกับ --card-bg)
+           เพราะเป็นการ์ด "ผลิตภัณฑ์" ที่ต้องคงเอกลักษณ์สีเสมอ
+           ────────────────────────────────────────────────────────── */
+        .card { 
+            /* ดีฟอลต์ = การ์ด "รวมทั้งหมด" โทน Indigo */
+            --c1: #6366f1;          /* สีอ่อน (ไฮไลต์) */
+            --c2: #4338ca;          /* สีเข้ม (ฐาน) */
+            --glow: rgba(99,102,241,0.45);
+            padding: 16px; 
+            border-radius: 18px; 
+            color: #fff;
+            /* สีแบรนด์ทึบล้วน — ไม่มีแถบขาวที่ขอบอีก (กันขอบขาวขุ่น) */
+            background: linear-gradient(145deg, var(--c1) 0%, var(--c2) 100%);
+            /* เงาสีแบรนด์อย่างเดียว ไม่มี inset ขาว */
+            box-shadow: 0 10px 22px -8px var(--glow);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* เงาวาวแบบนวล ๆ ที่มุมบน — จางหายก่อนถึงขอบ จึงไม่เกิดกรอบขาว */
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: radial-gradient(120% 80% at 18% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* แถบแสงกวาดตอน hover (เงาวาวเคลื่อนไหว) */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+            transition: left 0.5s;
+            z-index: 1;
+        }
+
+        .card:hover::before { left: 100%; }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 16px 30px -8px var(--glow);
+        }
+
+        /* แต่ละการ์ดมีโทนสีแบรนด์ของตัวเอง (คงที่ทุกโหมด) */
+        .card.success { 
+            --c1: #34d399; --c2: #059669; --glow: rgba(16,185,129,0.50);
+            animation: cardPulse 2s ease-in-out infinite 0.5s;
+        }
+        .card.danger { 
+            --c1: #fb7185; --c2: #e11d48; --glow: rgba(244,63,94,0.50);
+            animation: cardPulse 2s ease-in-out infinite 1s;
+        }
+        .card.warning { 
+            --c1: #fbbf24; --c2: #d97706; --glow: rgba(245,158,11,0.50);
+            animation: cardPulse 2s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes cardPulse {
+            0%, 100% { box-shadow: 0 10px 22px -8px var(--glow); }
+            50%      { box-shadow: 0 14px 26px -8px var(--glow); }
+        }
+        
+        /* ตัวอักษรสีตามหัวข้อการ์ด: ขาวเด่นบนพื้นสีแบรนด์ + เงาให้อ่านชัด */
+        .card-label { 
+            font-size: 11px; 
+            font-weight: 800; 
+            color: rgba(255,255,255,0.95); 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative; z-index: 2;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+        }
+
+        .card-value { 
+            font-size: 40px; 
+            font-weight: 800; 
+            color: #fff; 
+            line-height: 1.05; 
+            margin: 10px 0 2px; 
+            animation: numberCount 1s ease-out;
+            position: relative; z-index: 2;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.22);
+        }
+
+        @keyframes numberCount {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .chart-card { 
+            /* กรอบกราฟ = สีฟ้าแบรนด์ทึบล้วน คงที่ทุกโหมด (ไม่มีขอบขาว) */
+            background: linear-gradient(145deg, #3b82f6 0%, #1d4ed8 100%);
+            border-radius: 18px; 
+            padding: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            box-shadow: 0 10px 22px -8px rgba(37,99,235,0.5);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 170px;
+        }
+
+        /* เงาวาวนวลที่มุมบน จางหายก่อนถึงขอบ ไม่เกิดกรอบขาว */
+        .chart-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: radial-gradient(120% 80% at 18% 0%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 48%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .chart-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 16px 30px -8px rgba(37,99,235,0.55);
+        }
+
+        .chart-wrapper {
+            width: 188px;
+            height: 188px;
+            position: relative;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .content-box { 
+            background: var(--card-bg);
+            border-radius: 20px; 
+            padding: 20px; 
+            box-shadow: var(--shadow-lg);
+            overflow-x: auto;
+            animation: fadeInScale 0.6s ease-out 0.4s both;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: fixed; 
+        }
+
+        th { 
+            padding: 12px; 
+            color: var(--primary); 
+            font-weight: 800; 
+            font-size: 12px; 
+            text-align: left; 
+            border-bottom: 3px solid var(--primary); 
+            background: var(--table-head);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            animation: rowFadeIn 0.5s ease-out both;
+        }
+
+        @keyframes rowFadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        tbody tr:nth-child(1) { animation-delay: 0.05s; }
+        tbody tr:nth-child(2) { animation-delay: 0.1s; }
+        tbody tr:nth-child(3) { animation-delay: 0.15s; }
+        tbody tr:nth-child(4) { animation-delay: 0.2s; }
+        tbody tr:nth-child(5) { animation-delay: 0.25s; }
+
+        tbody tr:hover {
+            background: rgba(245, 158, 11, 0.1);
+            transform: scale(1.01);
+            box-shadow: var(--shadow-sm);
+        }
+
+        td { 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border-color); 
+            font-size: 11.5px; 
+            word-wrap: break-word; 
+            vertical-align: top; 
+            color: var(--text-main);
+        }
+        
+        .col-id { width: 80px; }
+        .col-name { width: 120px; }
+        .col-score { width: 50px; text-align: center; }
+        .col-pass { width: 150px; color: var(--success); } 
+        .col-fail { width: 120px; color: var(--danger); }
+        .col-note { width: 100px; } 
+        .col-status { width: 70px; text-align: center; }
+
+        .badge { 
+            padding: 4px 10px; 
+            border-radius: 6px; 
+            font-size: 10px; 
+            font-weight: 800; 
+            color: white; 
+            display: inline-block;
+            box-shadow: var(--shadow-sm);
+            animation: badgePop 0.4s ease-out;
+        }
+
+        @keyframes badgePop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .bg-pass { 
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%); 
+        }
+        .bg-fail { 
+            background: linear-gradient(135deg, var(--danger) 0%, var(--danger-light) 100%); 
+        }
+
+        .text-fail-detail { 
+            color: var(--danger); 
+            font-weight: 700;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Success notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.4s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.show {
+            display: flex;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        @media print {
+            @page { size: A4 portrait; margin: 0.4cm; }
+
+            html, body {
+                background: white !important;
+                color: #1f2937 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 10px !important;
+                width: 210mm;
+            }
+
+            body { background-attachment: scroll !important; }
+
+            .no-print, .bg-dots, .bg-particles,
+            .date-input { display: none !important; }
+
+            #reportContainer {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 4px !important;
+                margin: 0 !important;
+            }
+
+            .header {
+                background: linear-gradient(135deg,#7c3aed 0%,#ec4899 50%,#f59e0b 100%) !important;
+                color: white !important;
+                padding: 8px 12px !important;
+                border-radius: 8px !important;
+                margin-bottom: 6px !important;
+                display: flex !important;
+                align-items: center !important;
+                page-break-inside: avoid;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .header-left    { display: flex !important; flex-direction: column !important; gap: 1px !important; }
+            .header-title   { font-size: 0.95rem !important; font-weight: 800 !important; color: white !important; }
+            .header-sub     { font-size: 7px !important; opacity: 0.85 !important; color: white !important; }
+
+            .filter-row {
+                display: flex !important;
+                margin-bottom: 6px !important;
+                gap: 14px !important;
+                align-items: center !important;
+                font-size: 8.5px !important;
+                flex-wrap: wrap !important;
+            }
+
+            .filter-item    { display: flex !important; align-items: center !important; gap: 4px !important; }
+            .filter-label   { font-size: 8.5px !important; font-weight: 700 !important; }
+            .filter-icon    { font-size: 9px !important; }
+            .filter-summary { display: none !important; }
+
+            .date-badge {
+                padding: 2px 7px !important;
+                font-size: 8px !important;
+                border-radius: 5px !important;
+                background: linear-gradient(135deg,#fbbf24,#f59e0b) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .shift-select {
+                font-size: 8px !important;
+                padding: 2px 6px !important;
+                border: 1px solid #e5e7eb !important;
+                border-radius: 5px !important;
+                background: white !important;
+            }
+
+            .dashboard-row {
+                display: grid !important;
+                grid-template-columns: 1fr 115px !important;
+                gap: 6px !important;
+                margin-bottom: 6px !important;
+                page-break-inside: avoid;
+            }
+
+            .stats-grid {
+                display: grid !important;
+                grid-template-columns: repeat(4,1fr) !important;
+                gap: 4px !important;
+            }
+
+            .card {
+                box-shadow: none !important;
+                padding: 6px 8px !important;
+                border-radius: 8px !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .card-label { font-size: 7.5px !important; color: rgba(255,255,255,0.95) !important; }
+            .card-value { font-size: 24px !important; margin: 2px 0 !important; color: #fff !important; }
+
+            .chart-card {
+                box-shadow: none !important;
+                border-radius: 8px !important;
+                padding: 4px !important;
+                overflow: visible !important;
+                min-height: unset !important;
+            }
+
+            .chart-wrapper { width: 100px !important; height: 100px !important; }
+
+            .content-box {
+                background: white !important;
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+                border-radius: 6px !important;
+                padding: 6px !important;
+                overflow: visible !important;
+                page-break-inside: auto;
+            }
+
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                table-layout: fixed !important;
+                font-size: 8px !important;
+            }
+
+            th {
+                padding: 4px 5px !important;
+                font-size: 7.5px !important;
+                border-bottom: 2px solid #f59e0b !important;
+                background: #f9fafb !important;
+                color: #f59e0b !important;
+                position: static !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            td {
+                padding: 3px 5px !important;
+                font-size: 8px !important;
+                border-bottom: 1px solid #f3f4f6 !important;
+                word-wrap: break-word !important;
+            }
+
+            .col-id     { width: 55px  !important; }
+            .col-name   { width: 110px !important; }
+            .col-score  { width: 40px  !important; }
+            .col-pass   { width: 130px !important; }
+            .col-fail   { width: 110px !important; }
+            .col-note   { width: 80px  !important; }
+            .col-status { width: 60px  !important; }
+
+            .badge {
+                padding: 2px 6px !important;
+                font-size: 7px !important;
+                border-radius: 4px !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .bg-pass { background: #10b981 !important; }
+            .bg-fail { background: #ef4444 !important; }
+            .text-fail-detail { color: #ef4444 !important; }
+
+            tbody tr { page-break-inside: avoid; }
+            * { animation: none !important; transition: none !important; }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-row { grid-template-columns: 1fr; }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .btn-group {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            .filter-row { gap: 12px; }
+            .header-title { font-size: 1.1rem; }
+        }
+    </style>
+<!-- ── PWA / Home-screen icon (single-file, base64 embedded) ── -->
+<meta name="theme-color" content="#f59e0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="รายงานประจำวัน">
+<meta name="application-name" content="รายงานประจำวัน">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZiYmYyNCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y1OWUwYiIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0icGciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjZmZmZmZmIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZmN2VkIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMiIgZmlsbD0idXJsKCNiZykiLz4KICA8IS0tIHN1biByYXlzIChkYXkpIC0tPgogIDxnIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNTUiPgogICAgPGxpbmUgeDE9IjI1NiIgeTE9IjQwIiB4Mj0iMjU2IiB5Mj0iNzQiLz4KICAgIDxsaW5lIHgxPSIxNTAiIHkxPSI3MCIgeDI9IjE2OCIgeTI9IjEwMCIvPgogICAgPGxpbmUgeDE9IjM2MiIgeTE9IjcwIiB4Mj0iMzQ0IiB5Mj0iMTAwIi8+CiAgPC9nPgogIDwhLS0gZG9jdW1lbnQgLS0+CiAgPHJlY3QgeD0iMTUwIiB5PSIxMTgiIHdpZHRoPSIyMTIiIGhlaWdodD0iMjg2IiByeD0iMjYiIGZpbGw9InVybCgjcGcpIi8+CiAgPHJlY3QgeD0iMTUwIiB5PSIxMTgiIHdpZHRoPSIyMTIiIGhlaWdodD0iNTIiIHJ4PSIyNiIgZmlsbD0iI2Y5NzMxNiIvPgogIDxyZWN0IHg9IjE1MCIgeT0iMTUwIiB3aWR0aD0iMjEyIiBoZWlnaHQ9IjIwIiBmaWxsPSIjZjk3MzE2Ii8+CiAgPHRleHQgeD0iMjU2IiB5PSIxNTYiIGZvbnQtZmFtaWx5PSJBcmlhbCxTZWdvZSBVSSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjMwIiBmb250LXdlaWdodD0iODAwIiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5EQUlMWTwvdGV4dD4KICA8IS0tIGJhciBjaGFydCAtLT4KICA8cmVjdCB4PSIxODQiIHk9IjMwMCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjY0IiByeD0iOCIgZmlsbD0iI2Y1OWUwYiIvPgogIDxyZWN0IHg9IjIzOSIgeT0iMjYyIiB3aWR0aD0iMzQiIGhlaWdodD0iMTAyIiByeD0iOCIgZmlsbD0iI2Y5NzMxNiIvPgogIDxyZWN0IHg9IjI5NCIgeT0iMjI0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTQwIiByeD0iOCIgZmlsbD0iI2VhNTgwYyIvPgogIDwhLS0gdHJlbmQgYXJyb3cgLS0+CiAgPHBhdGggZD0iTTE4NCAyODYgbDU1IC0zNCBsNTUgLTMwIGw0MCAtMjIiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzE2YTM0YSIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPHBhdGggZD0iTTMzMCAxNzAgbDEwIDI4IGwtMzAgNCB6IiBmaWxsPSIjMTZhMzRhIi8+Cjwvc3ZnPg==">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoi4Lij4Liy4Lii4LiH4Liy4LiZ4Lib4Lij4Liw4LiI4Liz4Lin4Lix4LiZIiwic2hvcnRfbmFtZSI6IuC4o+C4suC4ouC4h+C4suC4meC4m+C4o+C4sOC4iOC4s+C4p+C4seC4mSIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNkOTc3MDYiLCJ0aGVtZV9jb2xvciI6IiNmNTllMGIiLCJzdGFydF91cmwiOiIuIiwic2NvcGUiOiIuIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVnQUFBTUFBQUFEQUNBWUFBQUJTM0d3SEFBQUFCbUpMUjBRQS93RC9BUCtndmFlVEFBQWdBRWxFUVZSNG5PMmRlWndVNVozLzMwOTF6OGt4d3pVY0lqQ0lLS2Q0UmRhc055cm9LcUFzTWY0aUJzMnVxOW04TnB1TnhteDJvOUhzK3Z2Rm55YS8vT0pHMSt6bXdFMFVGeEgxaFNJb1JwSW9HQVFFZ3VEQkRUTXlNRE13Vjg5MDE3Ti85UFJNSDNVODFWM1QwMVZkMzlkTDdLcm44ejJtNS8wOC9hMmE2aXBCQVZqN212RzFKYUhRTklrOFN3cnRMS1E4Q3lHSEloa0FWQ01aQ0pRb0JaTTkveWhxSFF3b2haV0dMMjNET2FuYlZHcmhieHRhdmU1TVYwT0hEZ0hORXBwQU5vTTRDbklIVXRzbVkyd3IrK0R3eCtKQmRJZVpYRGZSSDBubEc1TlA2NUt4T2FCZkNlSUs0UFEwUmNyLzFBTTdjSElkb0RSUmNjTnZtMHJHSjhlckdxd3ExVXRmRXd2M05Ubk03SXJsYlFMSTFaTUdkNVhwTndzcGwwakVwWUJtb2t6NW4zb0NCMDRCL01hQy9NR2ZsbEIwZ1h3RHhFL0x0aHg1SlorZkRIMCtBU0pyeDA4SmlkQjlFcjRBVkZpL1pmMEZ2OFZBQUwrSnExdndaOWlud0JObGtZNy9FSXNibXgxVzVkajZiQUpFMXRYT0ZFTDdwcER5VmlBRWR1OXhzUEtyT3lzazlDYjh5VU9OQXZGL1NxdEsvNSs0WWwrSHM0VHE1dm9Fa0crUEg5M1ZGWHBNd0MzSTN2aUZDYi9GUUFDL2lXdGU0Tzgxd2FkQ2w5OHVYVkQzdkJDT3E3VTExeWFBZkJDdDY5SXp2aUtrL0FGUXBmNGVCeXUvdXJOQ1FqL0JuMkw2NjNvc2ZHZmx6WWNQT1N2QzJseVpBQjNySms4TWllaXp3SVdBZy9jNGdGL2RXU0doYitHWGlYOVBhRUordFd4Ky9iUE9pakczbkNkQWRGM3RJaW5FejRBcUlJRGZMRndBdjZWV1dTQkJJSjhwN1NyNWE3SDRVTHV6d2pJdDZ3a2cxMThlanVuN0g1ZUlyeVVYWi9EU3lGdEZaT0lXOVB4T2hqSUVIb2MvNmVWN3VoWmRNR0Ird3hGSDlhVlpWaE5BcnA1VUZpM1Rud0VXbVJSbjVhMGlNbkVMNEhjeWxDSHdDZnhKZGtTRGhhVUw2emJaRjJkc2ppZUFYRCtoT3FwcnE0QkxqWW9MNEUvZkNPQTMweW9MclBWdENEbS9mRUg5T3J1b1J1Wm9Bc2oxRTZxak1XMDlnbGxHeFFYd3AyOEU4SnRwbFFWcXBXUTlDWlFuZ1B6RDJJcG9lK2thNEJLajRnTDQwemVzSFVUWlNMUlJjd0hRNjE1RGR0U3JGeGpBYjJUdHhQU0Y1WXMrVytQRXllUjZuTFE2bGhPS3RwYytRd0MvZlRqRnVyVlJjNkhpZEtnNEhXM2tYUFVDQS9oTjNHVUZtbGpadG1Ma2JDZHVTaE1nTnF6Mmg4Qk52Y2t3ZW1sVWxZckl4QzBYK0tXNWZ3SEFEMEI0a1BIckFQNWNhcS9RQkN2YlY0d2VyK3BxT3dHaTYyb1hlZXRVWnk2L2lEUlIwUE5icGlvdytCTTJTZ2g5dFZ4WlhhM2liamtCT3RaTm50ajlSNjZNNGdMNDB6Y0MrTTIweWdMM2FwOGFrV1cva05MK0dOZDBBc2psaExvdmJ3ait3bXNWemhYNGM5RUg4SnZZL01nTG8rNjJFNWxPZ0s2aEUvOFd6MXpiazZzK2dGKzFGby9BSHpjaEgrdDhvZVljSzRuaEJKQnZqeDh0QkErbEYxZTQ4SnNNQlBDYnVCWUIvUEhZNWJvdWxzbW56TDlQYmpnQnVycENqd0dEQ3g5K2FlNGZ3Ry9pV2pUd3gwMHdJekpzMU5mTlpCa1RvSFA5aEZuZFgyYkppR1daS2VqNUhkVGlFa1FCL0dxMUNQMUJzMU9qR1JOQTZOcDM4TVEzdVhMUkIvRGI2OVBUZUJUKytJNUtRZXovR3NsVEprQmsvWVN6a2IxLzhDcGMrRlhhSG9Hb3ZnQ3Q1aG9vSFc0c0N1QTNUU1hLUmlCR3pVVWJlcUZ5V1VxQy9NT2ZzRVdkSzBkOUxsMFJUdDRJeGJSdnllNUpVWmp3cXdNa3FzOUhHM2t0QUtIQlU0bnRmUXBpYlVxaE1vYjdHbjRuQWZPeDhvY3EwQ1lzZ2ZBQUVzZForb24zTE1zeUQrWkVuKzd1R3Z3QTZMcjhMdkFYeWZ0NlBnSGs2a21ESlN3MmRqVUlYTUR3QTRqU29iMGJvUUZvd3krMTFKdUdLN0tWSDBEVVhKRUVQMUE2ekxJc3kyREsrblIzZCtIdjNuOTk1NHBSS1I5cFBST2dxMHkvR2Fnc1RQaWQ2Mlh6TnBDOTkxY1NWZWNoeWtjSDhOdWxxaGlOTnVTODNoMVNSelp0TVMzTE9waXFQdDI5TCtDUG02N3IzMDdlN3BrQThUdTJLV1RxbDVWZnBlZFBHNHJVSTV1VGZuRkNROVRNdytvSzhIekNMenVPR3I0MjlNMFQvQktCTm1vZWlONzNTRzk4UC9WU2JRL0Rqd1FFTjdTdUdqNG1zU3ZlNzYrZk5MYjdkb1hXbVFxODdVazN2V0U5eEZwN3RrWEZHRVNWOFI4Rzg3M3k2MGRmUVRac1FEWnNRRC82aXJsdjN1QUhiY2dzUk9WcHZXT3hkdlRQMWp1b3BjRGhqMXM0M0NXV0pEWTBnQzVkenFIZzd0V1pxMTVDckFQOTJGc3BlN1dhcXlCVVlSNHVYMjFQZDIzNnNiY2cxbUVnY0ZaR1hKODkvSVRLMFdxdVNCbU8xYStEV0x0aUxaNkF2M3RUTEUxY0tCZUhYdXFYVzNwNnBPMHhFc21tcmNqMnBIc3BoU3JRaGw5bUhLNEllLzZFbDlaejROdTl2LzBJc25HcllpM2VnYi9iSm5ldEdINCs5S3o2NG5KVFR5K3UvR20xeVByWFNEa2dyajRmVVQ0bWdMOTdVNVNQN0Q3dzdSWG9SMStOSy93SGZ5THRQQUN0ZmMzNFdtQzhvV2Uvd08vT3lwL3lzcU1PMmZSKzd3NGhFQ1BuMG5OQVhNVHdBMmlqcndQUjJ3SHJKellqMncvN0ZuNlFJTVJjQUswa0ZKcG02T25odHNkSXJ6ZThCZEhXM3VIRUFYRlJ3eS9SaHB5THFCemJxMGtjK1BvWmZrQ0hpNXIrcTJxSUpvVThPOFBUODIyUGdjVTYwQnZlU2wzNVJsd0ZvZkljYS9FdS9LWUh2bEc3T3c1NkcvNXVTYWlzdFB3OFRVcnRyQlJQbjYzOHlhWTNiWVhFQWJFa0RzRHdTeXg5ckdON0dINUFHM0ZaNm9GdjJ5SGtpYTFxd1V3MjdXc3BDUGpqaHpjaU5sTkRjS2F2Vi82VVlZbGV2NGI0QVhGOGo2aWNtR1V0M29ZZlFBdzhJMG1uOXg3NDJnVXoyYlN2cFhEZ0J4QlNUTmRBSDZZUzN6aW1OMWIrNUdIWmZoUjVZbVB2ZHNzZWRXZVZoQjZCSDBDZTJ0M3pXaisrRWRsdTlCZHBZMSt2dzk5dFo0dk9kYlg3a09sbmdXek1sWlUvLy9EMzFpMFFBeWJFZDdYdWMxaUxQK0NQVy9mN0lHM2VCMy9DRDdBN2pHUlF4bTdibUxtdS9FNzBGcUtzNEkvL1g3YnVkZUNza05CejhNZjN5eGFiOThHLzhBTlVhOEJBMjhKU2duaXA1MC9leU9VWFllUHZTZmhWYXZFMS9BRFZZYURVT2xOeUVLK3YvTTdTS0NVTTREZHhMM2o0QWNxVTdnMGFyUHhPOUNhQ0FIN0ZXdklHUDVEMmxVanptSDVjK1llaXRVOUVub3hCZXdTaXNXd0xMQURyclZQNWZ2ZmhNS0tpSERtNEV6MzhKNUJkR2JHTU51MUw4UTc4WURjQmZManlDNFpEM1Zqa3JqK2k2MWFuL2Z4dmlYZElWRmFqVFQrSFdQbm1WSUI5RGorQTZGeGJheXozNGNvdllsT1FtL1pCVzVOS0FVVm5ZdncwOVBFSFFiWVVCZnhnOWlVWVA2NzhzU25JRFRzRCtDMU03dCtKdG5zRVNQVVRnM0ZIYjhLUGxBWVR3SldWMzhTL0g5c2V1V2tmeExvTXh3UHJOVm4vQ2RyUk0wQXFIazE0R0g1SS93VHc0Y29QUU4zWVlPVjNZUEtUTFdpeGN4V0Uzb1lma2crQ2Zkanp4MjBvY3RjZlZRcHdia1BuRUxyZzNIaCsyUVV0KzVBZnZZSGUwSktxMHlhaFhiWUFFVDZNdnVGWlpJZE04cCtCM1BGdjZCMlg5TDQrRWtseUxrWE12QXR0K0FIMERhdTZUOVpvaUVtM285V0NmUGVYNktkMFhMZGRoMkJHR0lnYWovc0FmdWo1VHJDRFNGNWErUUd0ZlNMb1JxYzRYYkNoYzlDdS9nYWhXWmVoVFo2TGRzMlBDZC8zTHVHckwwbzlIMWw3QjZGNTl4SzY1bUZDMDRabStHdGpLbEpmcDFnbjh0UUl0R3QvUkhoMjk1V3I1WmNRV3Z4OVFyVTZzcVVQNEFka2N4MUNubVV5NkEvNEFUUS85dndwc3BOOUEwaXZSZEhmdkkydUorYlI5ZjJMaVc1dVFidjZKNFFtSmtBdVI1czFEeEhaamp4ZWpqYnIydVRiN3FqWnZoOFMyOUtNdVBKZXRBRWxpTS8vSTlxZ0hjUmUrYlhqdjVjNU1lMVVaZVpPSDhFUG9QbDE1ZSt4OWc1N2pWc1dPNHkrOXVkSWVScmExQm54ZmFXZlI1dGVBMy82RWJGdGUySFNmTVJndFQvQTk1aHNSSC90VWZUd0RZUnVlSWpRWmRPUUc3OUg3RWpmSHRUTDFramFEbi9CRDRxUFNmWGl5dDlqbXVuRFFmckdUaDVGNmhwaTRKRDQ5cGtMMFFZMG9XOWJqNzd0WmFRMkcyMzZhT2R4bTVZVGUvTUR4UGwzb0VWZklyYnVIWGZyTmpJUjZuM3RRL2hCWlFKNGRlWHZsb3Jxa2VwNk42ejZkSVNtSTA4MUFJUFJaczBCMlF5MTl4Q2FNUmE2U3RGbVhlKzhEYUlMK2Q1L29jZGl5TzNQb0xmMFllK1RzTVFrOWluOFlEY0J2THp5SjZUTm42bjc1R3FoTVdoemJrZUkvZWc3dGtQbGxXaG5WMEZqUGRSTVI0eXBRcDVvaEhFTDBJYUY3T09sVytKZ3ZxOE82dE5NTk5YN0duNnd1aGJJNHl0L3o4dU9Gbk9kS3haR3UzSVpKUmNDdzZZaEJrZVE2NzVNYkg4WG5IY1RXdGt4OUY5L2llaXU3bnVVanY0SFNyNys5Mmd6SnhJN1lCWXJjZXBSUjI2NW4raTdIL1h4ejJCc3NpdGlMK29SMis1d01Kd2YrTUZzQXBpdS9HWUpWVkxsSC82NE9lNDExTzNFT3ZTMXg3czNvckQ5VjhpUDFxTFhOd0ZoUkdRVHNkZitHMzFQN3cxNnFmc05zWmRCdEZkMis5Y2pqN1JEUjNLc2hPbHcvRlR2WnRjTzlIV1BJUTRkSWkrbTJWOHNESGdXZmdEUitmcUVWQTlUZncrMVBVa21QajRUZVdDSGVvekFla3ljUGhWOTNDNXJrWWZoUjZaL0F2aHE1WGZvSDVoejh6ajhrSHdRN0pPZVh6bGhZTG1aRCtDSHhDZEFzUElINXNSOEFqOUl3bjVmK1VYTkJDZ1piQ0RUb2EwSjJkNE0wUWpKdDArM3o1R3Q5ZS9FakFoQldRSVlUWU5RS2FKc0lGUldReWp6RDRaaVNEV1FkZ3pnSS9qQjhDeVF2MVorYmM2ZGFNTm1Pd21TUlUyS0dsdVpuVUJhYnRyRnVPZjNqL0g0NSs1bWNFbjZCWGRHcmhMOStFWmk3Nnl4Q08xdCtFSDFVb2lNQUFxaUFvQS9KeXM0K0hPVHY3ai85N3g4OEIxZVBiUkpJWjVCY0IvQ0R5a1RRSnBYNGt2NDNaZ3crWVJmNWYwMUhqalYxY1lEVzM4QndJcjlienRQNzFQNHdiVnJnUW9VZm9lZ3BBN25xMTkzOFZQR3hCN2U5Z3gxN1kwQWJLamZ6dEcyRXhadWRtMldmK0NIbnN1aGZiank5em44YnEzK0RzM2grN0RseE1jcysyUnR6N1l1SmFzTy9sNHR1TS9oQjZ0UEFGL0NyNUtuMFBwKzlmYzQzYUl5eGpjM1BZbWVCcytLZlJzTTRqbnVneHdNRnliOFlIbGJGQWRaUEFOL0h0dWFmdTc3QWY3dHc1ZlkwYlF2WS84SGpYdlozWFJRSWI5OUR2dmh3b1VmYVRRQmloVitWMWQvTjJMa3BqblVlb3dmN2x4aE9yNHlwUTJ5eXVWZitNSHd0aWdPc2dUd0cydjZ1ZThIdUgvenoyaUxtbjhkOVBtOXYwVmFIZjlsWFZmcVlDSERENDZ2QmZJaS9DcTUvTlAzUS95Yy85b2pteTAxaDlvYStHM2RCODZESjh3SDhFUEtiVkVjWlBFVS9IbnMrOTNXWk5IM04zZTI4YzliZjU2eFh4aDhCM1BMY2JzdjJwams4UW44Z09xMVFENkYzKzIrUDVjMnpDWE5tMGZmNS9yVEx1TDBnU1BZMTFMUHl3ZmVwYkh6Rk5JQXJLRmx6cDZPWlovZVcvQ0R5dk1CQXZqVk5BWFE5d01zSFA5NUtzTmxQTHgxR1IrZE9tS3Ftem1rbHB2R1d6MGoyU0NYeitBSDJ3bmdaL2hWekR0OVA4VC82UFc5TGIvaW5XTi9NdFVNTFJ2RU42WXU0c3VUcnFiRTlDdVB4UUUvU0tzSjRBUDRjMjVKSE9SeVM1TkYzMys0dFlGSGR2eUcvOTc3TnRKRVY2S0YrZktrYTdoMzJtS3FTZzN1K0dhVng2ZndnK2tuZ0kvaHoydmY3MVlBWTAxVFp3cy8yZlVpLzc1bk5aRllwNkZHSUxqaDlObjg4emxmWXR5QUVTNlg1MjM0d2U3N0FBSDgxaHBYV2g4N2VlYk9MajNLTHo1ZXc2TTducU81czgwMDNDVWpaL0RBT2JjeFkwaXRZaTFPNnZVKy9KQXhBZndPdjRvVmJ0K3ZTOGtMK3pmd3lQYmZjS2oxbUtsdVN0VTR2bnZPYlZ3NWVsWjJ0U2hxdlE0L3BFd0FIOE92TGxDdy91bjczNjc3Z0llM0xlT0R4cjJtRVVkWER1VWZwdjBsdDlaZVNVZzR1UUZ2Y2NLUDdKa0FQb2ZmdzMzL3pxYjlQTFIxR1cvVmJUVlZEaXdwNTJ0VEZuTFg1T3VwQ0pjNWc4YVIrUXQrZ0xEdjRWY1RxR3Z5MVBjZmFUdk80enVmNTllZnZrbk01QXY3WVFRM05iUnd6N2FOREgveGRWcUE5QnRCYXNQR1VqRm5LWlhYM1lQeEhYbFY2L1VmL0pEeGlDUW45WGdGZmhVcm5MNi9xYk9WSC85cEJULzc2RlhUTXpzQTh3Ylg4dFdYbGpPaHRkMHltMzc4RUszUFBReEN4Q2VCNDNwN2RYNkRIeFN2QmZJMi9HNjJBTG5tTWErOVM0K3k3Sk8xWEx6NmIzbml3MVdtOEo4MzdFeGV2T3A3L0hqZlNWdjRrNjE5emRQSzJ0NzZKSDZHSHhTdUJmSTIvQ3JtMXVxZlhSNko1T1VENy9MOWJjdlkzMXB2NmoxcDBHbDhhOFl0M0REdUlnU0NwaVp6clpIcGpVZVY2akhTK0JWK3NMa1VJb0MvVzlOSGZYLzh6TTZ2TE0vc0RDMGJ4RGVtTFdMcG1YTUpPenF6bzFDQTViRC80UWVMQ1JEQTM2M3BnNzUvejhtRFBMcmpPVjQ2WVA2WW84cHdPWGVlT1plL20zb1RnMG9xZTUxek5uWDRWVjB5WTNnRGZqQ1pBTDZCdnk4Zm9SaFA0RWh6cE8wNGorOTRubDkvK29iNW1SMFI0b3NUcitDKzZiZFFVMUh0TUZlT1ZtVHdnOEVFS0E3NDg5djNOM1cyOHBOZEwvRDA3dFYwV0p6WnVYVFVUQjQrZHlsblY1MXVHQ2QzNitOSjVESDRJVzBDQlBBbmFWeG9mYUl5eG4vc2ZwWEhkejVQVTZmNW81bytOL3hzSHBpMWhBdUdUODRxanl2bTlQZWQ0ZTg5K0NGcEFnVHdKMmxjZ0g5YjR5ZmN0K2xKdHA3NHhGVFRlMlpuTnNMSm81emNuaE5GQ2o5MGZ4K2dPT0IzeTZ4ek5IVzI4Qy9ibnVHWlQ5Wm0zSkFxWVRVVjFkdzcvUXZjT3ZGS3dzTHFhWkc1L29JVnJJamhSMEs0ZU9Edis3Ny9wUU4vNEI4M1A4MnhqbWJEY2VNek94YTFGTHA1SEg3SXVCUWlnRCtiT0orY1BNSjlmM3lLMzlWdk54d1hDRzZkZUJYZm5ua3JJOHFyRk9veEdTK2sxZDhIOEVQS0k1TDhDcjlTa0t6Zzc5S2pQUG5oeXp5NjR6blRTeGVtVkkzbjBRdnY0c0xoWjVuR1VTM1JWUXZnUjlKektZU2Y0WGRwZ3FUWkh6N2J5WDN2UGNsSEp3OGJlbFNFeS9qcTJmUDUrdFNiNDE4K2owYUkvZTVwNUw3TkVEVTVGVnBTaGpqenp3bk52ZzIwcEdPRGpQUTUva3dCL0QwdncvNkdYeW1Rbzl5ZnRUZngwTFpmV240Qi9lb3hGL0RJZVhkeStzQ2E3aFNTNkMvdVFQLzRkL1lKZHIyQlBMaVY4QmQrWkY1dmY1blA0QWVsK3dKWkpTd0crR1gzdjVMbjkvNlc3Mjc1VHhvanh1ZjBSMVVNNFRzenY4VGkyc3RUSXh6Y29nWi90K2xiVmlFditTdkVtR25PSUZJeDVkVS9UZU5EK0VGMUFuZ1pmbE81T3Z3N20vWng3NlluMlh4OGo2RXFMRUlzblR5WCs2ZC9rWUVHRDZDVHh6NVZMcmZINStodXhPaHBqdjJzZy9iOG95Sk0ydlFuL0tBeUFYd0p2NXB6ZXpUQ1l6dVg4OU5kTHhHVk1VUFZ6Q0cxUFBxNXU1azE5QXlMOThya0VheVdsdTZUcjlhbmVPQUh1d25nVy9qdFYvL1hENy9IL1p1ZjVuQnJnK0Y0VmVrQTdwMittRHNtWHhmL0FyclQ5OHJPM0c1OVhJMmpFcjd3NFFlckNlQUQrSTI5ck9FLzJuYUNmM3IvWjd4eTBQeFM1UnZIWGN5L252K1Y3blA2cG9sY3Nud2U5T1pwd2hZSS9HQTJBWHdGdjh3Y05MSG45cTduVzM5OGl2Wm94SEQ4ak1GaitNRUZkL0huSTZjcmhNd251RzVZOGNHUE5Kb0F2b1hmdW9hNjlrYStzZkVKdzE2L0xGVEszMDI5aWE5TldVaHBTT1c4Z1VkYUZqZnllQmgrU0o4QXZvYmZ1dldwYXo5dUNQOWxvODdoZjEvdzEwd2NORG96cnR0OWY1L0U2VVB6T1B4Z2UxdVU0b0FmWU1hUVdtWU1tY2oyeHZncHk1cUthaDQ2ZHlrTFUrNmhuOFBQVkxDVzVRL2lBL2hCSmw4TDVLQUtUOEd2RmlRa05GNjg2bUZlMkI5L2h1NzhjWitucW5SQVppTExGQjVvV2R5STR4UDR3ZlMyS0Q2RFh6SHN3SklLbGt5Nkpzc0FYdnRJeVBKbjhoSDhZUGlnN0dLRFA3dThPY1hJeWZweG92a01mckM2UGJwbEVCdEJvY0N2R3Nob3BLMmUyS0hYa0oxTnBocHQwQm1FeGw2YmV1Vm1uMW8rVzUrMDR5WWZ3ZzltdDBlM0RHSWpLQ1Q0bmY0aXVrMXYyRXhrM1Y4aU80Mi8yWlZzV3Mxc3l1YzhENkZ5VzIxaFdBQi9zbW0yb1h3SnY3VjF2dmNkSmZnQjlNL2VwV3ZYa3hhS2ZqNWdkUnlqZU9BSE1MdUl4WGtXVDhGdkxkQ1BiMU9yS2FHdi8wTzJoU2hhUC9YOVBvY2ZEQStDczhqaUkvZ0IwTTF2WG1Wb0ZqZTd5dDN5ZklDZHpVRytSK0VIc3dsUXpQQjdmZFhPMm9vUGZxVFJCUEF0L0E0UytpNk9RcDVzVW5rY2ZraWZBTDZHUDQ4dytTaE5kdm05QVQ4a1Q0Q2loNzhQaVhJN3RLdnhzbGo5ZlFJL0tENGl5YnZ3U3hXUm9rYkZjdjNscTZad3NkNGloaDlBOHpmOERwSTZkY3M2WDZHWUN2eE8zaHZ2d1E5V3AwSFR2WHdKdnp0dXBvNEZ2Zm9ySlRQZHRCMzBBUHhnK2FYNFlvQS9oNS9SelRLVTQvVlQ2K05MK09NREpwOEFQb0hmNlMvT0xjc0luV091dk1Pdit2djNLdnk5WnZBSlVBendPNDJkaXhYU3NVRVdmYjhUblNmZ1R4M1FUQWQ5RFgrK1doOFhndmRuMys5RTV3bjRNODM0Y3VnQS91eXNvUHQrdDBKNUZYN2pnY3pMb1lzRi9wdzBLbTZGMVBjckozU3U4UVQ4NXZwdzhjQ3ZFdC9GQTAxUG1aL2hOeG5vM3UzZ1VvajBBRjZEdnc5Ykg3TThCUkhIRGZNcS9QWjZpOXVpV0FYd0kveUZCSnlLNVd1aWVSVis2NVUvWVFxWFFxUUg4REQ4cXBwUW1VcmdKSDJwZGE2U0xMNHZITGFxUVNJc3g0M2lsUnJzekdJU2VRSitkYjNOcFJEcEFid0d2MHFPekoyaGtSYzdDcXNOTzlleUlESHVYQWlWcUFjVUFuR2E5Y014U3FiOG1YbzhvS1QybkxROVdTd01ub0JmR2crYTZOVW5nQy9oTjdhU0MvOFZNV0NNa2xhck9vdndsSHNzTmFMNk5FTFhmVnY1OWltaHkrOUdESzgxR1kzL0lCWFhmb1dTc3k1U2lpY0dWREh3aXc4b2FkUHptRzNhK2hiNHlwOHdFWG41TlB0d0hvYS81T0xmb0EyZDdUaTVqRFFSTy9RcXN2a2pZNEVXUnFzK205RFllUW90VXp5UFBMb0xmYzhHYUc4eUdvYUtRV2kxc3hIalpxblZHNHNTMmJxVzZMNFBJQlkxOUFqVlRLQjAxaHkwcWhyek9DYTU5SWFOZFA3dWYza0VmcldlUDkwVUhwSGtYZml0YTdjT0pzcXFDWjl4aTRLcmVsRmk5QlJDbzZlWXhNcmlZRFFVcHV6OGVaU2RQNjlYNC9ROXRkTjRBdjdzOVRhUFNQSUIvSXA5djdMR01meHVhZktWeDJ2d1o3ZnlKOHppdGlnK2dOOXRjeHQrNlZJY2h6TDNBM2h2NVU4SVRSNlI1R2Y0c3dUT01SdjVoTit0MWljYnVUZFgva1RkQnJkRjhSbjhLZnNLcEdWeDhrdFMwZlJaMzYrd21IaDA1VTlvMHg2UjVEUDRBVHBQT0Fqb3RiNWZ4Ykt2UlhZMld2dDRlT1ZQV05LMVFENkVINUF0SHpzTWxoN0FkRVBGd1dRNG42MlB3enpKVUxmWEtlWDE0c3Fmc083Ym92Z1Rmb0JZM2V1S1FkM28rMVZTZUtmdjE0OFpQU3U1UDFmK1hINUh4dStYNW1mNEFXVHpUdlRHemM3cTZGT05TM242ck8vdjN1eHFSai8yZTh1OFhsNzVFK2J3V3FEMHZJVU5mOEppT3g4QnFhdlZZYmc3bjYyUEc1Wjd2YkhkUDRWWThnUEQvYlh5Sjh6QnRVRHBlYjBCUHhMMEU1dUo3dm4vam54TU5sUWNUSWE5MGZjRDZFM2JpWDY2ekRTbkgxYitoS2xOQUEvRG43RFluaDhUTy9DY2RTM1oxS05VZzNmNmZ0bDJpSzUzL3diMFNLL0FoeXQvd3V3bmdBL2dqMi9IaUc2OW4raUhqNFBlcFppOHVQcCt2V0VqblcvZGpPeW9OOHpwcDVVL1lTTHkwcGdPd1BoeVJyL0FuN1pEREpwTWVNbzMwV291QjYzRVJPYTExaWVMUEluZmIvTXVvbnVlSkhaNGRaS21QMWQrSjNvRG9Ub3FFZEg1MHBoNkNUVVpRejZGUDlsRTJWREVrUE1SRldNUlplYVhDMmU5eHBzZWVEc09aUENKWnFBeEg4eTBqZ1prcEFIOXhGWmsyMEhMZlBsZCtmdSs3VW15aHJDRVp0SW5RQkhBRHlBN1RpQ1ByclVNSmxNM0hkU1NTeSt1OHNuaVlOQlJLVVd4OGlkY1RtbkFjYU9FZm9kZkJhSUFmbnU1bzBRRjBQTW51d2doV2pUZ3cvU0VBZndCL1BsZCtmUGE5dlJ5THZVR1RRcXhQV1duU2dVQi9DYnVBZnoyZXJWeWxJVlp4NVlJS1hhSDBlWDJ6THdCL0FIOEt1azgxL09udkpBYXU3V3lpTFlaaUFYd0IvQVh5OHJmODBxeVd4T0xENTBBM3JPdElJRGZ4RDJBMzE2dk1KaG4rQUUwRWRxcEFlaXdKb0RmUGxTbWV3Qy92VDU5b0REZ0IvWlhMR2s4b0FGSUdYdlZQb0NpSUlCZm9aWmloRDlYdmF2d0l5WHJvUHRhb0lyNTladEFabjUxS29EZnhEMkEzMTZmUGxBd0t6OEFtaWJlaE80SklBUlNDUEZ6WjhVRjhLdnBUVGRzdEFxRG5vSGZpZDVBNkRMOFFDd1dpL1ZPQUlDdVVQUS9nYWhhY1FIOGFuclREUnV0d3FBbjRNOVYzeWZ3STZWOGMrRFMxanBJbWdBRHJ6OVdoK1NWQUg0ejl3QitlNzNDWUgvREQwaE42L20yVDhyM0FiU1FlTmpTTzRCZlVXKzZZYU5WR1BRRS9JWFg4eWVOdEE0b0wxdVoySmN5QVVwdk9QSStZSEpHS0lCZlRXKzZZYU5WR1BRTS9FNzBCc0srZ3g4a3o0ckZ4MW9TbXhuZkNOUFJIN0p3dDh0amtqMkEzMXFyTU9nSitIUFY5ekg4RUFzSmZwQThsakVCS2hmVWJ3UldHTHBiNXpISkhzQnZyVlVZOUF6OEJkdjJ4RjlMdWJ6ODlsTjdrc2NOdnhPc0kvNGVhQW5nVjlXYmJ0aG9GUVk5QVg5QjkveUpEWW1VajZSckRDZEE1WUlqQndYNnY1aEhVeWt3Z045YXF6RG9HZmlkNkEyRWZROC93QzhITG0zZG5xNHp2U3RFYWVmd3g0RWRObmxNc2dmd1cyc1ZCajBCZjY3NnZNSGZxR3Z5VzBaYTB3a2dGdS9zRkJxM0lHbDNWbUFBdjdWV1lkQXo4QmQ4MjVONDhaMUJTMW8rTTlKYjNoZW83TWE2blVqdVZTOHdnTjlhcXpBWXdHK1R6aW44dkZPNXIrVXBNeDlobTFjaUlpK09YZ2x5dnAxUTJRTDRqUWM5QWI5bmVuNkFSaTBhT3JmaUswMzd6ZnhzN3d3bkJMS3NMTElFeVFmbTJRUDRyYlVLZ3dIOE5yRWR3eStGNEU0citFSHgzcURpdWhNbnBSUTNJc2g4WWtJQXY0MVdZVENBM3lhMlkvZ1I4SGpsN2FkV3B1dlRUZm51MEJVM0g5MnZTZkVYUUd0dndnQithNjNDWUFDL1RXem44Q05aVlZGNXl2Q3NUN281ZWo1QTZjS2pteEhpWnFBOWdOOU9xekFZd0c4VE82dVYvNjFLVHQwaUZoTlRTZVhzQVJsQStZS2phOURsalVDYmtrTUF2L0ZnQUw5TjdDeFdmdVQ3SFpId0FyR1VEdFYwamljQVFQbk45ZXVrcHMwRldpeUZBZnpHZ3dIOE5yR2R3eThsdjQxRVNxNGNlbGRqczVPVXRxZEJyYXh6NVloWk90b3FKT015QmdQNGpRY0QrRzFpWjdQeTgySmw1YWxieFdLSGY3UWx5MCtBaEpVdVBMWTFwc1grVE1LbWxJRUFmdVBCQUg2YjJJN2hsd0llcTZ3OHRTZ2IrQ0hIVDRDZUtwYVByZWdzaVQ0bHBid3RnTjlrTUlEZkpyWmorQnNSTEIxdys2bFZEak9tbUNzVElHR1JGU08vQUR3aFlWaDhUd0MvU3JnTWNiL0FiekpZbVBDL28wVkRYN1Q3STVlS3VUb0JBRnBXMVl3TVI4Vy9nN3pSVWhqQWIrd2Z3RytjUHI3UkpJUjRzS0xpNUU5VVQzUGFtZXNUQUVCS1JPZktFWXVrRkk4QVoyUUtMTDFUSlFIOEN1bDhENzlFOGlzOUpPOHp1Nm96Vyt1VENaQXcrUlFsa2VFamw0TDhQakFpdnRQU0kxVVN3SytRenRjOXY0NWtOYnIyd0lBN210OTNtRW5KK25RQ0pFd3VIMUlWQ1pmZWdTNi9pdEVuUWx5VjlDOEIvRXJwZkx2eXR5SjVOaVQ0UWZwM2VOMjJ2RXlBaE1rSDBTTFRSMTRQOG03Z0txQzBleVRwWHdMNGxkTDVidVdQU1NuZmxHalBES2dzZXlINTFpVjlhWG1kQU1rbWx3K3A2Z3lWenRXbG5DK1E4eVJVeHdlY0Jncmd0OWNyRFBRUC9IdWw1RTBOc1Q0bVkyOGtibGVZVCt1M0NaQnM4a0cweU5RUkUzV1lKWVNZS2FRK1F5SkdJYWlHbnYvS014MEQrTzMxQ2dOOUEvZDdyUE1BQUFBa1NVUkJWSDhuOFV0bG1wQ3lCVGd1WUkrVVlyY1VmS2lKME02S0pZMEhsS1Axa2YwUG1lakVSMzBoRkNJQUFBQUFTVVZPUks1Q1lJST0iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9LHsic3JjIjoiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFnQUFBQUlBQ0FZQUFBRDBlTlQ2QUFBQUJtSkxSMFFBL3dEL0FQK2d2YWVUQUFBZ0FFbEVRVlI0bk95OWQ5Z2tWWm4rZjUvcU4wMU9UR0NBWVdhWUdjS1FsaUdLQ3JpeUNvb29LS0tDcUlzaXV1dCsxYThZRUFQcXV1TFgxWFYxZjJKQ2tWVkFjczRqT1NNNXpNQU1ZU0tUOHh1NjYveitlUFA3ZGxWWG5UclBxVlBkOTMxZFhNeGJkYzU5UHgycVAwL1hxZTVXb0hLWHZuNzZ5TTVSSTJlVkt1SE1VT21aU3FtZE5QUWtRRS9Tb2RwSktVd0dNQTVBMFBOL1FLTUZ3Q2kzaGRiYzREQmJmS0pWQytNQTRleFlleDM1aDd5TTRpelZLSHBUYTVnN3ZwdXJaNmNzUW1FVE5FSUFXd0hWQmVnZEdsaW5nRlVLV0tXaDNsUktyd2gxdUFxQmZxbDErK3JYMUNtb1dLNmVNcERLdTRCR2tyNWw5NTNMemNGK0NJTUR0Tkw3UTJNdUZHWUJtREprWklTQmVJblJJdnlGUlBqSFo0dE9Fck14TXZmaStIWlNSQWVnRmdONENjQkxDUFhUWWJOK2FNUjdWcjdtSXB6cUZ4c0FJZW1GTThkWHd0SVJGWVJ2VVZCSFFPTUFBRHNsbUpscXN4TVIva0lpL09PelJTZUoyUmlaZTNGODUxREVnRWdGck5iQXc5RHFrVERBZzIxam1oOVF4N3phN3I2b3hoRWJBRXZTOTg2WTBObGVPbFlwOVE0b0hBbU5mZEI5eWo2TlM2ck5Ua1Q0QzRud2o4OFduU1JtWTJUdXhmR2RML3dqZG04SGNBKzB1azBGbGR0YTM3ZnFPU2QxTlpEWUFCaEthNml1aFhzY3BIVDRiZzExSERRT0IxREs0Smhxc3hNUi9rSWkvT096UlNlSjJSaVplM0Y4ZXduL2FsdVdRNnRyZFJCZTN2YkVxbnZWZHhDSzFOWkFZZ09RVWgxM3paa2ZoT0hwZ0RvZDBOUHRIRHFFdjUwb3d0OHdtZkFYRWVFZm41MTA5L0F0Q2xnSGpaczAxRjliTzFmY3hJc0t6Y1FHSUlFNjc1eDFxSUk2Vld0OFVBRzc5VzRuL0Yxa2kwKzBhbUVjUVBoTFR4S3pNVEwzNHZndUp2eXJESGxOS2YyN1N0RDArNUVuTEZ0dVdGbERpZzFBaFBUdHM4ZDFLZlZoQlgwMmdBT0g3YmVUa21xekV4SCtRaUw4NDdORko0blpHSmw3Y1h6WENmd0hLd1J3bDRMK2RjdllWVmVyWTFCT2E5Qm9ZZ013UkYxM3pIcWJodnFNQWo0SW9LM2FHTUxmUmJiNFJLc1d4Z0dFdi9Ra01Sc2pjeStPNzdxRS85RHByeUhBejFyYnk3OVZwNnpabXMyc2ZzVUdBSUQrRG9MSzIyYTlSK3ZnRzRBK1BIYXNuVVJKY3pNUi9rSWkvT096UlNlSjJSaVplM0Y4TndEOEIxdHRCdkNIaW1yNjBhZ1QzMWhoejdnKzFOQU5nTDVwenRoeVMzaW1WdmlDQW5aM2Mvd1MvbmFpQ0gvRFpNSmZSSVIvZkhiUzNWYmhQMUR0VU9xaXNLeitmZVRKeTVmWkN5bTJHcklCMFBmdE9hYmNVZjQzUUg4WndQanVqVFhtMkVtV05EY1Q0Uzhrd2o4K1czU1NtSTJSdVJmSGQwUERmNkRhb2ZDcnJnNzk3Mk5PV2JYR1htQXgxVkFOZ0w1KytzaXVFVzJmVmdwZkJ6QzFmMGVOZVhiU0pjM05SUGdMaWZDUHp4YWRKR1pqWk83RjhVMzRWOUUyUVAraVZiZjloL3JBcXh2dGhSZExEZEVBNk1jV05IZHQydmhaQlgwdUJvSWZJUHlqTnpqTUZwOW8xY0k0Z1BDWG5pUm1ZMlR1eGZGTitNZEpBZXUwd2pkYk8xYitwaEcvUzZEdUc0Q3VPMmEvRXdvL0JiRHZzSjJFZjlRR2g5bmlFNjFhR0FjUS90S1R4R3lNekwwNHZnbi9GSHBTQTE4WThmNlY5MXFxcGhDcTJ3YWcvYTVaZTVhMCtrOEF4MWNkUVBoSGJYQ1lMVDdScW9WeEFPRXZQVW5NeHNqY2krT2I4RGR4MGNCZmRLbDBUcU44b1ZEZE5RRDZnVjFIbEhlMGZBdkFsd0UwVng5VXc4Tk9KWkxtWmlMOGhVVDR4MmVMVGhLek1UTDM0dmdtL0xOSmJZTFc1N1MrZitWdmxNcjFFUlZYWFRVQVhiZlBmaXNDL0FiQVhwR0RDUCtvRFE2enhTZGF0VEFPSVB5bEo0blpHSmw3Y1h3VC9oYU43MFZZT3JQdHBPV0xwRkx5VmwwMEFIcmh6UEdWc0hTQmhqNFRjYmVKOEkvYTREQmJmS0pWQytNQXdsOTZrcGlOa2JrWHh6ZmhMMkM4SFZxZDIvclV5cC9YNDY4UEZyNEI2TG5JN3c4QWRva2RTUGhIYlhDWUxUN1Jxb1Z4QU9FdlBVbk14c2pjaStPYjhCYzIvbHRZS1oxZWIxOGlWTmdHUUQrMm9MbThhY081QU00REVNUVBydUZscHlKSmN6TVIva0lpL09PelJTZUoyUmlaZTNGOEUvNk9qRGVwVUgrMjlhVFZsMHBWNEZxRmJBQTZidDk5N3lBSS9oZFEvMUJ6TU9FZnRjRmh0dmhFcXhiR0FZUy85Q1F4R3lOekw0NXZ3dCtaY2M4UUJmeXBaYVErVzcxcjlUYXBhbHlwY0ExQTUxMnpQNlUwZmdGZ1JNM0JoSC9VQm9mWjRoT3RXaGdIRVA3U2s4UnNqTXk5T0w0SmYyZkdRNGRvUEFlVVRpcjZCWUtGYVFEMFRYTmF5eTJWQzZEVUY1Sk55TFE3b1FoL08xR0V2MkV5NFM4aXdqOCtPK251T29WL3Y3WW9yVDdSZXRMS3F5d1c1RlNGYUFEMG5mTjJLZXZLRlZEeFA5WGJQeUhUN29RaS9PMUVFZjZHeVlTL2lBai8rT3lrdStzZS92MGpOQzVvZlhyVk40cjRLUUh2RzRDdU8yYTlEVXBkQVdCS29nbUVmOVFHaDluaUU2MWFHQWNRL3RLVHhHeU16TDA0dmdsL1o4WnBzaFZ1Yk8zcytKZzZaY01tNDVKeWtOY05RUG5PV1IvU1VCY0RhRXMwZ2ZDUDJ1QXdXM3lpVlF2akFNSmZlcEtZalpHNUY4YzM0ZS9NMkNSYjR6bXQxWHRHbkx6eU5ZUFp1U2orNDNNNXF2T08yZittb1M0RjRSOHZ3bDlJaEg5OHR1Z2tNUnNqY3krT2I4TGZtYkZwdHNKOFZkSVBkVjY3ODhHR0RzN2wzUmtBdmZEb3BvcCsvUmRhNDZ6a2t6THR6aGJpeFl0RDVBYUgyZUlUclZvWUJ4RCswcFBFYkl6TXZUaStDWDlueG5heXR5SFFIMjA3Y2ZWMVZ0d0U1VlVEMFBORFBsY0NPQzc1cEV5N3M0VjQ4ZUlRdWNGaHR2aEVxeGJHQVlTLzlDUXhHeU56TDQ1dnd0K1pzZDNzQ3FBKzEvYUJsYisyNm1wWjNpd0I2RnVuamlxM3Qxd0h3cisyQ0g4aEVmN3gyYUtUeEd5TXpMMDR2Z2wvWjhiMnMwdUEvbFg3VmRPK1l0M1pvcnc0QTZBWHpoeGZEb01iQWJ3bCthUk11N09GZVBIaUVMbkJZYmI0UktzV3hnR0V2L1FrTVJzamN5K09iOExmbWJIMFhhM3hvN2FUVm4xTk9NVkl1VGNBZXVHOG5jcGgrVllBQnlXZmxHbDN0aEF2WGh3aU56ak1GcDlvMWNJNGdQQ1huaVJtWTJUdXhmRk4rRHN6ZG5aWHEvOXFmZi9LTHlxVjZ6TnNtSEp0QUxyZithdTdFbjJuZjkra1RMdXpoWGp4NGhDNXdXRzIrRVNyRnNZQmhMLzBKREViSTNNdmptL0MzNW14Njd0YTZ3dGJQN0Q2YkorYWdOeXVBZERYVHg5WkRvUHJDUDhFSXZ5RlJQakhaNHRPRXJNeE12ZmkrQ2I4blJubjhYZ3JkVmJITmRQK0s0ZmtTT1Z5QnFEbmF2OGJBUnlUZkZLbTNkbEN2SGh4aU56Z01GdDhvbFVMNDRBNmg3OGFQUmRxNG1GUWJkTzdVOXBYUUs5L0dIckxZZ00zd2orVENIL0w4aFQrZ3d2NFdkc0hWbjh4N3lxQUhCb0EvZGlDNXZLbURkZUNWL3ZYRnVFdnBNYUZmekQ1R0toSlIxYVBYM3Mvd2pVTFU3Z1IvcGxFK0Z0V0FlQ3ZkVzhaUHhoeDB1cHY1bHlOK3lXQXlxWU5GNEx3cnkzQ1gwaU5DMzgxZW00ay9BRkE3WFFrMU9pNUNkMEkvMHdpL0Myck9QQUhBQVdjMjNIVnRLL21XQTBBeHcxQTExMTduS2VCVHlhZVFQaEhiWENZTFQ3UnFvVnhRSjNESHdEVXhNT3NqQ0g4TTRyd3Q2eGl3Yjl2RS9RUGQxdzk3UlB1aSttWHN3YWdmTWNlSDRiVzMwMDhnZkNQMnVBd1czeWlWUXZqZ0FhQVA0QytOZi9ZTVNOcWpTSDhNNG53dDZ4aXdyOUhTbW45Ni9hckpyL2JaVGtENWFRQjZMcHoxdHUxMG45RTBtc09DUCtvRFE2enhTZGF0VEFPYUJENEF3Q0Nsb3hqQ1A5TUl2d3RxOUR3NzFVekVGemVlZlhPQzF5VU0xVGlEWUJlT0dkWFFQMFZRR3V5Q1psMkp4VGhieWVLOERkTWRnLy96Q0w4TTRud3Q2eTZnSCt2eG9RNnZISEg1ZE5uU0paVFRhSU5nSDVzUVhNNURDOEZNQ1haaEV5N0U0cnd0eE5GK0JzbUUvNGlJdnpqczVQdUp2eXRLRG44ZXpWVk5WV3UwN2RPSFNWUlRwUkVHNERLcG8yL0JCQjkyZkZBRWY1Ukd4eG1pMCswYW1FY1FQaW5FT0dmU1lTL1pkVWwvSHQxUU1jMi9FbHJkeC9QRjJzQXluZk9PbDFEZnpyUllNSS9hb1BEYlBHSlZpMk1BeG9WL2taeGhIOG1FZjZXVmRmdzc5VUhPcStaOGkwYnBTU1JTQVBRY2RlYytScnF3a1NEQ2Yrb0RRNnp4U2RhdFRBT0lQeWxKNG5aR0psN2NYd1QvczZNaXcvL0hodjE3WTZycHB4a3hheUdyRGNBK3FZNXJVRVlYZ0pnUk8zQm1YWW5yVWpTM0V5RXY1QUkvL2hzMFVsaU5rYm1YaHpmaEw4ejR6cUJmNCtVaHZwRCs3WFQ5N1JwV2szV0c0QnlXL2p2VURpdzVrRENQMnFEdzJ6eGlWWXRqQU1JZi9jaS9IUE1UcnFiOExjaXUvRHYxUmhVS3BmcnkzZXQvVVk2ZzZ3MkFGMTN6SDRuTlA1UHpZR0VmOVFHaDluaUU2MWFHQWNRL3U1RitPZVluWFEzNFc5Rk12RHYxZjRkVGVYL2xBeXcxZ0RvaFRQSFErRVBOVDBKLzZnTkRyUEZKMXExTUE0Zy9OMkw4TTh4TytsdXd0K0taT0hmRy9MWmppdW5mbFRLM1ZvRFVBbExGd0RZSlhZUTRSKzF3V0cyK0VTckZzWUJoTDk3RWY0NVppZmRUZmhia1JQNDkwUUJ2MjYvZHZJY0NXOHJEVURYWFRPUDB0Qm54ZzRpL0tNMk9Nd1duMmpWd2ppQThIY3Z3ai9IN0tTN0NYOHJjZ2gvQUlEQ0tGU0NQK2pMVWJKdG5ia0IwRGZOYVlVT2ZvVzQ3L2tuL0tNMk9Nd1duMmpWd2ppQThIY3Z3ai9IN0tTN0NYOHJjZzMvZmgzWldacjJaZHVtbVJ1QWNtdjRIUUI3UlE0Zy9LTTJPTXdXbjJqVndqaUE4SGN2d2ovSDdLUzdDWDhyeWcvK2dBWTA5UG1kVjAwNXdLWnRwZ2FnL2E1WmV3S0k3a29JLzZnTkRyUEZKMXExTUE0Zy9OMkw4TTh4TytsdXd0K0tjb1ovajFwRHJTN1dsODlQOExPZXlaU3BBU2hwOVZNQXpWVjNFdjVSR3h4bWkwKzBhbUVjUVBpN0YrR2ZZM2JTM1lTL0Zma0IvMTd0M3htcy9Zb3RlK01Hb091TzJlOEVjRnpWbllSLzFBYUgyZUlUclZvWUJ4RCs3a1g0NTVpZGREZmhiMFYrd2I5N3M4SjVIVmZ0dkxlTkNLTUdRQzg4dWdrS1A2dStzOFpjazhDa0xsNjhPRVJ1Y0pndFB0R3FoWEVBNFM4OVNjekd5TnlMNDV2d2QyWk0rRWVwVmV2dy83UHhxNEZHRFVCWCtNYlpBT1lQMjBINFIyMXdtQzArMGFxRmNRRGhMejFKek1iSTNJdmptL0IzWmt6NDF4cDBWUHVWa3orWk5TcDFBNkJ2blRwS1FaODdmRWVOZVdtRDByaDQ4ZUlRdWNGaHR2aEVxeGJHQVlTLzlDUXhHeU56TDQ1dnd0K1pNZUdmYUZDZzFBWDY4bDBuWm9sTDNRQ1VTNk0vRDJCcWxYb2lSZmk3eUJhZmFOWENPSUR3bDU0a1ptTms3c1h4VGZnN015YjhFdy9Td0tTT1V0ZDNza1NtYWdEMHd2bWpvZlRnai8wUi9sRWJIR2FMVDdScVlSeEErRXRQRXJNeE12ZmkrQ2I4blJrVC9nYUQ5T2M2cnBtNm4ybHNxZ2Fnck51L0NHQktiRDBEUlBpN3lCYWZhTlhDT0lEd2w1NGtabU5rN3NYeFRmZzdNeWI4VFFlVmRLaC9haHFkdUFIUU44MFpDNjIvVkx1ZVJMdVRwa3FhbTRud0Z4TGhINTh0T2tuTXhzamNpK09iOEhkbVRQaG5HNlR4aisxWFREM0JKRDV4QTFCdXFYd2F3UGhrOWRnUTRXOG5pdkEzVENiOFJVVDR4MmNuM1UzNFcxSFI0ZDhycFg5bzhtTkJUWWxLV0hoMFUxZjQraGRVZ25vSWZ4Zlo0aE9OTE5Ub3VWQVREb1ZxbTk0OXRYMEY5SVpIb0xjdU5nc2cvS1VuaWRrWW1YdHhmUHNEZnpWbUh0U2t3NkJHOUJ4UE8xWWdYUGN3OUphWHhMT2RHQlArTmdiMWFuNTdNT1Vqd0p1WHBKbVU2QXhBUmI5K2lnSm1FUDZSR3h4bWkwODBzbEE3SFkxZ2wxT2dSczRFZ2hZZ2FJRWFPYk43MjA1SHB3OGcvS1VuaWRrWW1YdHhmUHNELzJES094RE1PQlZxMUN3Z2FBV0NWcWhSczFDYThXRUVVOTRobXUzRW1QQzNNV2lRbE1MMzB2NU9RS0lHUUd2OEcrRWZ1Y0ZodHZoRUl3czFlaTZDU1VkRzdnOG1IUWsxWnVnUFJoTCs4ZG1pazhSc2pNeTlPTDc5Z2I4YXV6ZlU1TGRHVGdnbXZ4VnF6RHlSN093aS9PT3pyUTJxcHBrZHBUV3B2aHlvWmdQUWRjZXN0MEhqMExneGhMK0xiUEdKeGhacVF1elRvM3ZNbEgvcVBqTlFLNER3bDU0a1ptTms3c1h4N1EvOEViUWdtUGF1bWhPQ1NZZmJ6ODRzd2o4KzI5cWdPSjJuYjVyVG1uUnd6UVpBUTMwbWZyOE5FZjUyb3R6REgwRGZtbi9zbUtZeFVKT09qQThnL0tVbmlka1ltWHR4ZkhzRWZ3REI1TGNCeldOclR1aTlMc0JtZGpZUi92SFoxZ2JWMGk0ZE83YWNrWFJ3YkFPZ0Y4NGNyNENUSXZlbktTczZSZExjVElTL2lJSUpod0V0TytXU1RmakwyUmlaZTNGOCt3Vi90RXlFbW5SWXNna21NQ1A4YzhxMk5paHA0RmVUZmlJZ3RnSG9xcFErRG1CazFRaURzaEs3ZVBIaUVMbkJZYmI0UkNzV3VuMUZzb0dxaEdCcWxkT2JoTC8wSkRFYkkzTXZqbS9QNEE4Z21INDhvQVorTUN0NmdtNWZhVFhiWElSL2ZMYTFRV2swdTdOcGN1UWI5NEdLYlFBVTlLZXFiU2Y4WFdTTFQ3Um1vVGM4bW5pc0dqa0xhc3lBbjdJbS9LVW5pZGtZbVh0eGZQc0hmNHpkQjJyVTdNUVR3blVQMjhzMkZ1RWZuMjF0VVByb1VIMGp5YzhGUnpZQW5YZk9PaFRBQWNPTU14WVc2K0xGaTBQa0JvZlo0aFB0V214ZEJMM3RsY1RqMVpSanV5OElKUHlsSjRuWkdKbDdjWHo3QjM4ZE5DR1k5czdFRS9TMnBjbS9DNER3enluYjJpRFQ3QVBicjU1NlRLMmhrUTJBZ2pxMXVtOVdFZjUyb3Z5QWY2L0NOMjhEZERuUldOVTBGbXBpOU1jR2JZandyNkpLUisweFlZSXhWVVg0eDJkSDd3NG1Id1hWUEQ3aGhCRGh5bHVzWkp1TDhJL1B0allvVTdZSzllZHFEYS9hQUdnTnBUVk9qdkROSU1MZlRwUmY4QWNBZEs1SG1HSXBJSmg0ZVBRRmdSbEYrRmUzU2JKdW5IcHR1ZGM4dzI1UmVRNS8xVElSUWQrRmY3VnJETmM5Q04yeEpuTzJ1UWovK0d4cmcyeGtuN2o5eW9tN3hrMnAyZ0NVNzVoOXBBSm1SUHVhaVBDM0UrVWgvSHR0MTk0RDNiVXAyZUNvQ3dLejFwQjRaMlBCSHdEMHVvZHFEMDB3cHFxNTRXNVJlUTUvQUFoMmZuZlBoWCsxYTlSZFd4Q3V1VGR6dHJrSS8vaHNhNE5zWlRlcHNPbk11R2xWR3dBVjZGUGlmZE9LOExjVDVTLzh1NzNMMEd2dVNEeGNqUnB5UVdEVytNUTdHdy8rQUtDM0xvWmVlMS8wMExYMzFmamRoaGh6ZzkyaUtnRDgxZGg5b0ViUHFUMmhSK0dxVzRHd00xTzJ1UWovK0d4cmc2eG1LNFhQNkF2UkhMVi9XQVBRZmZvL09MbUdid29SL25haVBJZC9UNERlOGdMMHRwY1R6K2k3SURCemN0S2RqUW4vWG9WckZpSjg0MUxvN2E5MnIvZUhIZERiWDBYNHhxVUkxeXkwVjZNWHg3ZS84RWZmaFgvSmF0VGJsa0p2Zmo1VHRya0kvL2hzYTRNa3NuZnVuRFRsUFZFN2gvMGFZTmZDUFE1UzBOTUpmeGZaNGhPdFdpUU5DTis4RGFXWk00ZDhwcm02VlBOWXFFbEhRcWVDVDFSeXJaMk5EZisrWFZzWHAzeW5uOEk4d1c1UkZRSCs2TDN3YjF4QzN3UVgvaEgrT1dWYkd5U1VEV2pnTkFEWFZOczM3QXlBcXVBNHd0OUZ0dmhFcXhhcEFqclhJOXp3U09MWldTNElKUHpsYkl6TXZUaSsvWWIvNEF2L2Fxdm1oWCtFZjA3WjFnWUpaZmZwaE0xWDdUS3AybzdoU3dCS0gyZFkwa0NYVkp1ZGlQQVhVdlVBRnhjRUV2NXlOa2JtWGh6ZmZzTWZBSUtkM3dXb1JOL1VXdnZDUDhJL3AyeHJnNFN5QjZtbFJaZFByclpqVUFPZzc1MHhBWWovNWIvYUl2enRSQlVYL2dDQXNBejlwdHdGZ1lTL25JMlJ1UmZIdC8vd1YyUDM3cm53TDVsaUwvd2ovSFBLdGpaSUtMdmFQSDFhdGMyREdvRE85dEt4cUhKZFFJcVVWSnVkaVBBWFV0d2ljOC8vdHJ3QXZkWCtCWUdFdjV5Tmtia1h4N2YvOE8rKzhPL1k1UFp4Ri80Ui9qbGxXeHNrbEIycHQyNi9mTkl1UXpjT2FnQ1V3aithK3hQK2RxTHFBLzY5Q3QrOERRZ1Rma05nendXQmhzbUV2NGdJLy9qc3BMdTF2UXYvQ1ArY3NxME5Fc3FPbFFxQzB2dUdiaHh5RFlBeS9INVd3dDlPVkgzQkg0RFZDd0lKZnprYkkzTXZqdTlpd04vYWhYK0VmMDdaMWdZSlpTZlNpVU0zOURVQWV1SE04UUFNdnBXRjhMY1RWWWZ3NzkxbDRZSkF3bC9PeHNqY2krTzdHUEFIZXIveEwrT0ZmNFIvVHRuV0JnbGxKelo3aDc1Ni9QaUJXL29hZ0VwWU9nSTFmaDY0aW1HcXpVNUUrQXZKRFA3ZCs3TmRFRWo0eTlrWW1YdHhmQmNIL3YzZitKZE1WUy84SS94enlyWTJTQ2c3bFZselo2WDVud1p1SGRBQUlPWHBmOExmVGxTZHc3OTNtT0VGZ1lTL25JMlJ1UmZIZDNIZ2o2QTUrNFYvaEg5TzJkWUdDV1VibVEwNnZkclhBS2hBSDI1b1dIT3pFeEgrUXNvTy8xNVp2U0NROEJjUTRSK2ZuWFIzLzViTUYvNFIvamxsV3hza2xHMW1GZ0x2R1BqM3dGUCsrNXNZMXRyc1JJUy9rT3pCSDBDcUN3STFBRFh4Y0tocUZ3UVMvZ0lpL09PemsrN3UzNUw1d2ovQ1A2ZHNhNE9Fc3MzTWV2NmF1ZVB5cWJONnR3VUFzTzIyM2FaRFkzSmF3MXFibllqd0Y1SmwrUGRPVFhCQllKKzlLa0VOdlNDUThCY1E0UitmblhUMzRDMlpMdndqL0hQS3RqWklLTnZNYk5CZnBiRHZMRUFBQUMycXRGOWF3MXFibllqd0Y1SU0vTHZueDE4UU9OUiswQVdCaEwrQUNQLzQ3S1M3QjIvSmRPRWY0WjlUdHJWQlF0bG1ac090MVRHOS8rcGVBbENsQTlJWTF0cnNSSVMva0FUaDMyc1RjVUZnbEgwdzVWaEF0U1FZS1NUQzM3MEtEUDlNRi80Ui9qbGxXeHNrbEcxbVZ0VmE5MS92RjNUL2pYMlRHdGJhN0VTRXY1RGs0ZCtyb1JjRXh0bzNqVVhRZDBFZzRlL0UzSXZqdTREd1I0WUwvd2ovbkxLdERSTEtOak9Mc1o2OTZmS3hFNEcrTXdCNnp5U0dTWnpGUmZnTHlSMzhBUXk2SUREV3ZtZW5tbmc0Vkd2Vlg3U1VFK0h2WGdXSHYvR0ZmNFIvVHRuV0JnbGxtNW5Wc0ZhdGFGc0E5RFVBbURWOERPRnZKNHJ3ajdTdWRVSGd3R3dWUUUxSi81UEJ4aUw4M2F2ZzhBY01ML3dqL0hQS3RqWklLTnZNckthMUJyVFNCd05Bb0crZE9nb2FPdzBiVVR2SHJRaC9JZVVEZndEUXVvd3c2b0pBUGZ3UE5Xb1cxT2g1c2tVTnl4YWRKR1pqWk83RjhWMWMrS3N4ZTZhLzhLOFM4Vk8vbVVYNHgyZGJHeVNVYldhV0JQNEFvSUNEQUNEb2JCNHpzL3Z2R2haZXZEaEVibkNZTFQ3UnFvVnhnRFQ4ZS8rLzVRWG9iVXRqc2djWG9pWWVLbGtXNForSDZnRCtBRktkK3RmYmxrSnZpdmlwMzh3aS9PT3pyUTBTeWpZelN3cC9BTkFhZXdGQVVLcUVNMnRhZVBIaUVMbkJZYmI0UktzV3hnR080TityY1BYTi9SY0V4c0FmQUZUYmRLbXlDUDg4VkNmd0J3QTFJdUZ6VTRjSVYwVDgxRzltRWY3eDJkWUdDV1dibWFXQlB3QkFZYTYrSEtVZ1ZOZzkxc0tMRjRmSURRNnp4U2RhdFRBT2NBeC9BRURuZXVnTmo5U0VmL3oyakNMODNhdU80SjlHNGRxSW4vck5MTUkvUHR2YUlLRnNNN1BVOE85V2EzdGwybTZCMXBoQytOdUtJdndOa3hHdXZROG9iNjQ1VXJldnRGcFRqVGpiazhSc2pNeTlPTDdyQi81Nng0cmFZNkorNmplekNQLzRiR3VEaExMTnpBemhEd0JRVGVHOFFFRlgvMnlWRnk4T2tSc2Nab3RQdEdwaEhKQWovS0VCaEowSVY5OWVzeEM5L21HTFZkV01zemxKek1iSTNJdmp1MzdnRHdEaHVvZHFtb2NyYnhuK1U3K1pSZmpIWjFzYkpKUnRacFlGL2oyYUUwQ3A0YisyNHNXTFErUUdoOW5pRTYxYUdBZmtEZi9lZjI1NUhucmQvZEZEMTkwUHZYV3h0Ym9JL3h4VXAvQUhBTDFsRWNJMTkwV2FoMnZ2Zzk3OFFpclBCS2xXaG9pSzhMZHVaZ0grME1DMEpndzlBK0RGaTBQa0JvZlo0aE90V2hnSGVBTC8zai9DTlF1aGRpeURtbmhZM3dWL3VuMEY5UHFIQ1g4YjVsNGMzL1VILzE2RmI5NEZ2V01aZ2ttSDkxMFVxTGV2UUxqdUllZ3RpNHc4bzBYNHgyZGJHeVNVYldabUEvNEFBSVdwVGNDQTd3RHc0c1VoY29QRGJQR0pWaTJNQXp5RGY5OWZXeGZiaFgxc3R1Z2tNUnNqY3krTzcvcUZmOS9zTFl0UTZZVzkyTTBsL09PenJRMFN5all6c3daL0FGcGpXZ0Rvc1drbldoZmhMNlRpd1Y5Y2hMOTdOUkQ4cGF4U0d4UCtOZ1lKWlp1WjJZUS9BQ2lFVXdNRjFlckhpMFBrQm9mWjRoT3RXaGdIRVA3U2s4UnNqTXk5T0w0SmYyZkdoTCtOUVVMWlptYTI0ZDh0TlNuUUdxMG1VNjJJOEJjUzRSK2ZMVHBKek1iSW5QQlB1SnZ3dHlMQzM3cVpEUHdCS0xRR0FGcHFEcFFRNFM4a3dqOCtXM1NTbUkyUk9lR2ZjRGZoYjBXRXYzVXpNZmgzejIzTHB3RWcvSVZFK01kbmkwNFNzekV5Si93VDdpYjhyWWp3dDI0bUN2OXU1ZEFBRVA1Q0l2empzMFVuaWRrWW1SUCtDWGNUL2xaRStGczNjd0IvQUJnUkFFajI0OVUyUlBnTGlmQ1B6eGFkSkdaalpFNzRKOXhOK0ZzUjRXL2R6Qkg4QWFBcHNHWlZTNFMva0FqLytHelJTV0kyUnVhRWY4TGRoTDhWRWY3V3pSekNId0RncGdFZy9JVkUrTWRuaTA0U3N6RXlKL3dUN2liOHJZand0MjdtR3Y2QWl3YUE4QmNTNFIrZkxUcEp6TWJJblBCUHVKdnd0eUxDMzdwWkh2QUhwQnNBd2w5SWhIOTh0dWdrTVJzamM4SS80VzdDMzRvSWYrdG1lY0Vma0d3QUNIOGhFZjd4MmFLVHhHeU16QW4vaExzSmZ5c2kvSzJiNVFsL0FHZ1NjU1g4aGRTWThGZDZWNmoyYWRCYlFtRHpWbURMZXVnZFc0SE83VUNseTNvZVZXd3BsMkZOclZCdG80RFcwY0Q0U2NEWU51aVIyNkdEUlFBNkU1b1EvdkhaMWdZSlpadVo1UTEvQUZDZHQ4K3lHMFA0QzZteDRLLzBMS2oxRTZHWHZBeTkrVTFydmhUbFJLMGpvWGJiQzNwYUdSclBBeXJxMkNEODQ3T3REUkxLTmpQekFmNkE3UWFBOEJkU2c4QmZLNmp5ZnNBclc2Q1h2NWpkajZJOGtOcHBCakIzS3NMbUp3RWREdGhEK01kbld4c2tsRzFtNWd2OEFac05BT0V2cE1hQXY2ck1CUloxUXE5WWxObUxvbnlVbWpvSG1OZUNFQytCOEsrVmJXMlFVTGFabVUvd0IyeGRBMEQ0QzZrUjROK0dZTTE4aE04OE5PVGRFVVhWbC9UcWw0RTNBNVQyT3hTVmNVOEI2SWdaN0t5c2lIekMzN2FaYi9BSGJKd0JJUHlGVlAvd1YzcFg0RGtOdlhwSkpoK0tLcHJVbEZuUWUzWkNZK1h3bllTL2pVRkMyV1ptUHNJZjBCay9Ca2o0QzZrQjRGL1pFL3JCTllRLzFaRFNieTRGbnRpT1FPODVaRWMrOWZUbkUvNjJ6WHlGUDVEbGV3QUlmeUUxQVB6TCswTGZ2d2pZc1RtVEQwVVZXdHMyUUQrOEJDcmN0L3R2d3QvR0lLRnNNek9mNFE5dDJnQVEva0pxQVBoWDlvUis0RG1ncXoyVEQwWFZoYm82Z0lkZjdHOEM4aExoYjkzTWQvZ0RKZzBBNFMra0JvQy8zaFg2NFZjSmY0b2FxSEluOFBnU0tNek1KNS93dDI1V0JQZ0RhUnNBd2w5STlROS9vQTE0VHZPMFAwVlZVL3RXcUtlM1Fha0pibk1KZit0bVJZRS9rS1lCSVB5RjFBandCNEkxODNuQkgwWEZTRzllRGJWc0YwQTcrakpqd3QrNldaSGdEeVJ0QUFoL0lUVUcvRlZsYnZmbi9DbUtpcFZlK2pTQ2prTWNCQkgrdHMyS0JuOGdTUU5BK0F1cE1lQVByWUJGbmVDWC9GQlVNdWxubm9ZS0pnc0dFUDYyellvSWY2QldBMEQ0QzZsQjRBOUFsZmZqMS90U1ZCcDFiSWRhdVl1TU4rRnYzYXlvOEFmaUdnRENYMGlOQTM4QXdDdGI3SGxSVklOSXYveDNLTXkyYkVyNDJ6WXJNdnlCcUFhQThCZFNZOEZmaGJQNHEzNFVaU0t0b1ZhTXR1cVhtd2gvaDBvT2Y2QmFBMEQ0QzZteDRBOEFhc05FcTM0VTFValNTNStDZ29XbEFNTGZ1bGs5d0I4WSttdUFoTCtRR2cvK0FLQ1h2R3pkMDJzMW5ZQ203LzhXUWRSdmJPb3lVTjRPdlcwMXNPWWw2TmNlUlBqOERRaGZYMldZOXhhVXpya0NwWW1sQVJzcjBQZDhBRjNYUFp5K1h0Mk84RTl6VVg2Nk05bitKTnIxSERUL3k1ZWdtbm8rMnFiWElQemZZMUIrY25qMjhHWUFBQ0FBU1VSQlZFM01KQVhzOHpNMGYrSlVxTjYzS0pYRnFQenFuMUJadWoxNWR0R2xOWUl0dTZBeVpua21qOXhFK0R0VWV2Z0RBODhBRVA1Q2FrejRLNzByOU9ZM3Jmc1dXcW9KYUI0TE5YNHUxTnozSW5qbkQ5RDByNCtoK1FzL1EybldsUFIrY3o2RVlFSnB5TVlTMUFFZlF0QnNwZUxzV3ZZTGxPOS91ZjhwcGlZak9PN0xDTnBpNXJRY2l0SjdUKzZIdnk1RFAzd3VLcTgyRVB4N3BKY3V6VENaOExkdFZrL3dCM29iQU1KZlNJMEpmd0JRN2RORWZPdE9xaGxxeGtkUU92dDJOQjF6TUpEME8yRFVPQVFISHdmVk8xN3Ivb2R5N1BFSTlod3JVS3lKdGtQZmZpN0M5ZVgrVFJNL2h0SlIrMGVNYjRaNisva29UUjdRd1d5K0NwVmI3OG5weFRWZjZjMnJvZFR1QmhNSmY5dG05UVovQUFnSWZ5azFMdndCUUcvaDUvNmhPNkh2K2lUS3Z6K3Q1NzlQb1B5WHI2QnkxNThScnRvdytPNFBwaUU0L2hJMEhUa3ZtZmVvZHlIWWEzeHZFUERTZFFqYmUrNXpOUkhCd2NjbWJ5YWsxWDRQeXRkZjFmOVZFS29GNnUzZlJtblMwTE1YQUNaOURLV2pEK2l2WGE5QmVNUDNFVzVyUVByM1NPMlltbTRDNFcvZHJCN2hEd3k3Q0pEd3Q2UEdoajhBWURNLy9nZUUwTXZ1UVBqODdUMy8zWXp3OFl0UnVlbUxLUC9rRUhUOStmZlFPd1kwU21vQ2d1Ti9ndExVcUlzSWVoVkE3WDhLZ3RiZWRmVnRDSi84RWNMRlczdU5nSGtmUkRER2x3NUFBOC85QUpWbjEvWnZhbjBMZ3VOUDZEK0RBWFF2RHh6L2Z4RzA5VzRNZ1pkK2lNcVRxMTBXNjUrMmxHdVA2UlhoYjkyc1h1RVBER29BQ0g4N0l2d0JBSnZYeVdjVVdYb0w5TisvZ2E0Ly9oYTZQT0R4YURrWXdWRkh4YzhOWmlKWWNGai91K1RPQnhDK3VCVGhjdy8wUDdUTlI2SjB3RzRTbFp0SnIwSjR3dzhSOWpVOEFkUiszMEJwenBpZXZ4VXc5eXNvN1RmZ0cvQTZIa0xsMnN0eVpab1gycmcrMlRqQzM3cFpQY01mNkdzQUNIODdJdno3VWpvYTc0S3Q5TkxBeXhlZzh2aktBZHNDcUgxT2pMK0liK3BKQ0hacjZmZFlmQzNDYlNIdzRnMElPM29lWDlVQ2RkQUgraStrODBIckwwWGx0b2Y3bjRMQkRBUW5uQTNWQktEcFFKUk8rT2lBQy85MlFOLzVEVlRXcEhqM1c2L2F0cW4yR01MZnVsbTl3eDhBQXNMZmxnai9RV0lEa0ZCYkVENXgwK0NmU2hoNUVOUzBxR1dBWnFnRkp3MEE1UmFFVDkzUi9kQnV2d1BoNHQ2bEZ3WHM4a0VFMDJzdEo3aFVHZnFCYzFGWjF0N3p0d0oyUGd1bHcrZENIZmxkbEtiMWRqMGFXSGtoeXZlK2tGZWhYa20zMTFoT0kveXRtelVDL0lFMFB3ZWNWWVMvNitUODRBOWc4T0l1RmFzVlQwR0hBeDRmdFF2VWhJaFRBRTJIb1hUZ3pQNi8yeGNpZkxIbkhhTGVpUENwdncxNGg3MEhnb01XQ0JTY1FaWG5VTG42d3Y1bER6VWF3YnN1UTlPeGgvUXZhVlJlUWVXYW4wTjM1VlpsY1VUNFd6ZHJGUGdEcmhvQXd0OTFjcjd3MXdEYXh0UWNSdldvY3gzUU1iQUJhQUxhUmxRZk8rOURVT042cjU0UGdSZXZSYmlqZDY3dStidjNkSUpuM3duUXE5ZC9qc3FEUy9xZmxpTjJnV3JyKzhZZjZFZlBRMlhwdHJ5cTgwK3RvNnB2Si95dG16VVMvQUVYRFFEaDd6bzVmL2dEVUdOU2ZuU3BrYVVDSUJoNHhrUURZYVhLdVBFSUZyeDd3R2YvTnlCODh1N0JZOXJ2UnZqaXh2Ni92ZnBPZ0Y1dFJYamJ0eEJ1ckhJYk4xMk55aTBMYzNxaDlWT3F0VW96VGZoYk4yczArQVBTRFFEaDd6clpDL2dEZ0pxMmw5dnNJbXZFemtEemdBWkE3d0MyN1JnK2J2VHhDUFlhMS85MzUzUFFIWHRDN2I1Z3dIL3pnRGVmNzM4c2ZQdE9nRjd0dUJPVkcyOFl6REc5QWVITjMwZTRsZlFmS0RWeHlLYzVDSC9yWm8wSWYyRG9id0hZRk9Idk90a2IrQU9BMm5VLzRPOVh1YTJocUpweENJS0IzNGtUTG9GZU8vVGRjUUMxLzRjUXRBd2dlZXZiVWZyczIxSGw2M1FHcVBjN0FhNUN1Tmtuc0dyb0ZjOEM0WW5vdXdGNkZmU0t1TjhJYUV5cHlYc0FlTEQ3RDhMZnVsbWp3aCtRT2dOQStMdE85Z3IrQUJETU84cHREVVdWbW96Z2tIOGEvQTU5L2YwSTF3MXBBSUxaQ0JZY1l2Wk8zcmZ2QktCU1NVM2Z1L3NmaEw5MXMwYUdQeURSQUJEK3JwTzlnejhBZFAza0hXN3JLS1FDcVBubm9iVFBnTlA2dWd2NjcxY04vbGdnQU94OE1vSmREYS9tOC9FN0FhakVLbC81ZGNKZndLelI0US9ZWGdJZy9GMG5ld2wvS29IVWFLaUR2b2VtazArQkduZ0I0SlliVUhsZzZPZmZtNGNBWEFNdmZnbGR2L3R6TkJmR2ZCUk5YL3ZQbnE4TDd2MU9nRitpc294ZnJFT2xFT0h2VUc3aEQ5aHNBQWgvMThtRXYvY0tvSFo3TjRLdzl3UHRDbWdlQjdYVGZsRHpUMEN3eTVUQnAvVEROeEJlODUzaEY4RTF2d1dsQTJmMC82MDNJM3o4bHZnM2hWdHZRYmo0dXdqMjdma0VRTTkzQWxTV1BXeng5c1FwaEY2eEVIcDlaNFk4S2xjUi9nN2xIdjZBclFhQThIZWRUUGdYUWFvRjZwamZKRHZJS204Z3ZPWjBsSjllTlh6ZnZGTVFqQjF3cWQvMk94RytVT1A3NGZWNmhJL2ZBY3cvcWFmSjZQbE9nSnNmUmlKK1YxT2EyNE5PaEZjdVFQbkJOdzNEcUZ4RitEdFVQdkFIYkZ3RFFQaTdUaWI4NjBtNkRDeS9ISlZmSFlmeWcxVysrbFpOR1BJeHZoRDZ1U3NRdGc4Zk9reUxya0s0ZGNERkJGNStKd0RsblFoL2g4b1Ava0RXTXdDRXYrdGt3ci9RMGtCWUJqbzNRSzliRFAzYWZRaWZ1UnJoeTB1ajc5c3g3eGtNN1hBRndzZnZTeGJYY1MvQ1oxWWhlTXYwN3I5N3Z4UGd1U3Y1V0ZMVlJmZzdWTDd3QndEVmVkdE1zM2pDMzNWeXNlQi9WNGRJR1JUVmlOSkhPdmdtSjhMZm9mS0hQN1RwRWdEaDd6cTVXUENuS0twWUl2d2R5Zy80QXlZTkFPSHZPcm1BOEdmSFFGR0ZFZUh2VVA3QUgwamJBQkQrcnBNSmY0cWk1RVQ0TzVSZjhBZlNOQUNFdit0a3dwK2lLRGtSL2c3bEgveUJwQTBBNGU4Nm1mQ25LRXBPaEw5RCtRbC9JRWtEUVBpN1RpYjhLWXFTRStIdlVQN0NINmpWQUJEK3JwTUpmNHFpNUVUNE81VGY4QWZpR2dEQzMzVXk0VTlSbEp3SWY0ZnlILzZBam1nQUNIL1h5WVEvUlZGeUl2d2RxaGp3QjZxZEFTRDhYU2NUL2hSRnlZbndkNmppd0I4WTJnQVEvcTZUQ1grS291UkUrRHRVc2VBUERHd0FDSC9YeVlRL1JWRnlJdndkcW5qd0Izb2JBTUxmZFRMaFQxR1VuQWgvaHlvbS9BR2dpZkIzbnR3UThHLzU4VXFUSUtzMUpMZVVmZ3djK2x1UDh1Qyt5Zk0xQ3NETnl4N0J6REhUc1BlNEdmYjhVNzVnZDl5d2gwWHZ4SVBTaS9EUHJRU1RBV2EvQmtqNG15WTNCUHp0U3hMKzBpTDhNL25uL1BUYjJyVUQzM2ppOTdqeTFYdUc3SkdFZndZUi9nNVZiUGdEUmcwQTRXK1lUUGdiU1JyK1B0eEdVMG5DWDFyUzhMZHpoL3pvbVV1eFl2dGFYUG5hZlFoMXI2YzAvQTM5Q1grSEtqNzhnZFFOQU9Gdm1FejQreUtuajRPanQzb2lNVG0vVGZVQS9rOXRXSUxmTGI0WkFMQmkrMW84dE9iNWJJYUVmMm96d2orK2hBd0RBS1JxQUFoL3cyVEMzMWk1bnl2MTJGOVNyTDJpUTN6bGtWK2hvc08rYlZlK2VxODEvK29pL0ZOWkUvNm1BL3FVc0FFZy9BMlRDWDlqY2QwL2tUL1gvVVgwdThVMzRha05Td1p0dTM3WkEraXNkSmtaU3QwbXd0K2g2Z3YrUUtJR2dQQTNURzVjK0dlMjRicC90TGp1THpTNVQ4dTNyOFdQbnJsczJQWk5uZHR4KzRvbjBodEtRWnJ3ZDZqNmd6OVFzd0VnL0EyVENYK2Z4SFgvOVA1NXlBUDRBOEM1VC93ZVc3dDJWTjEzNWV2M3BqTWovRk9aRWY3eEpXUVlVRlV4RFFEaGI1aE0rT2R2a3BOWWV6Nys5cnh2WHZZSWJsNzJTT1QrMjFjOGdVMmQyNjNsRWY0cHJBbC8wd0dSaW1nQUNIL0RaTUkvZjVNWXkySkFxS1kvMS8xRjFQdVovemgxVnJwd3c3SUhreGxLM0NiQzM2SHFHLzVBMVFhQThEZE1Kdnp6TjRteDlJQXd4dUs2djlEa1Flcjl6SDh0WFRIc1M0R3FTQUxVaEw5RDFULzhnV0VOQU9Gdm1FejQreWF1KzZmM3owT2V3SC9nWi81cjZhRTFMMkI1WEtOQStDYzJJL3pqUzhnd0lKRUdOQUNFdjJFeTRlK1BVUTVpN2ZuNDIvT3U5cG4vT0lWYTQrclg3cmVXYjBlRXZ4MDFEdnlCdmdhQThEZE1Kdno5TVlxd0xBYUVhdm9YcnM4b3hyby9VUDB6LzdWMDVXc1Jud2JJNVowNjRXOUhqUVYvQUFnSWYrTmt3dDlIY2QwL3ZYOGUzcDZjK28vNnpIOHRQYi94TmJ5dzZmWEJHd24vUkdhRWYzd0pHUWFrbHVHdkFRNFE0UzlmU0d5MjZDUXhHd0V6cnZ1YitPY2hUK0FQeEgvbXY1WUcvVUlnNFovSWpQQ1BMeUhEQUNObGF3QUlmL2xDWXJORko0blpDSmc1Rm12UHg5K3VkNjNQL05mU2xhL2RQK0FYQWwyTDhMZWp4b1Uva0tVQklQemxDNG5ORnAwa1ppTmdWc1d5T0JDSzlTOWNuMUdjZGY4a24vbXZwYjVmQ0hUKzdwL3d0NlBHaGorMGFRTkErTXNYRXBzdE9rbk1Sa3hjOTAvdm40ZTNSNmYrazM3bXY1YXVmUFcrQktNSWYzZlpTVVg0QXlZTkFPRXZYMGhzdHVna01Sc3h3N3BaOTVlTzRicC9yOUo4NXIrV2F2OUNJT0h2TGp1cENQOWVwV3NBQ0gvNVFtS3pSU2VKMlFnYU9sU1Jtd3ZXM3F1MG4vbXZwVTJkMjNIN1NvTmZDRXd0d3QrT0NQK0JTdDRBRVA3eWhjUm1pMDRTc3hFMDVMcS9GeXJPdWo5Zzlwbi9Xb3I4VGdDZmJuZzFFZjY1bFpCaGdOWHNaQTBBNFM5ZlNHeTI2Q1F4RzFGeDNUKzlmeDdlSHAzNk4vM01meTNkdnJMYUx3UjYvcHdrL0hNckljTUE2OW0xR3dEQ1g3NlEyR3pSU1dJMm9xWmM5OC9UMUpIczE1N2xNLzl4R3Y0TGdaN2Y3NFIvYmlWa0dDQ1NIZDhBRVA3eWhjUm1pMDRTczNGZzZraEZiaTQ4cU4yamh6N3JaLzVyNllyWEV2eENvQThpL0hNckljTUFzZXpvQm9Ed2x5OGtObHQwa3BpTnVDblgvVDFRc1U3OTIvak1meTA5dE9ZRkxOK3hGbDQvbUlSL2JpVmtHQ0NZSGRVQUVQN3loY1JtaTA0U3N4RVgxLzNUKytmaDdSSDhBWHVmK1k5VHFEV3VXSHEzYUVZbUVmNjVsWkJoZ0dCMnQ0WTNBSVMvZkNHeDJhS1R4R3djR2d0N3UvQ1hGR3NmS0p1ZithK2wzNzk4bTVPYzFDTDhjeXNod3dEQjdINE5iZ0FJZi9sQ1lyTkZKNG5aT0pHeldvdDg2dCtEeHNpajU1VHR6L3pYMHBRUkU0U2NNOXlwaEg5dUpXUVlJSmc5V1AwTkFPRXZYMGhzdHVna01Sc241anoxNzRHS2QrcGY0alAvY1ZxOGVabUFLK0dmWElSL1dqV1pUa3dud2o4K1czU1NtSTBUYzZlUGthTmxDNjc3MjV4Y1ZYR2YrVzlTSmV3eWNpZk1HRDBaWFdFRnoyeFlpbTNsOXN5WkFWUm1EMnNpL0hNckljTUF3ZXpxYWlMOEhSUVNteTA2U2N6R3ZYbVI0Uzh0MWo1VVAzN21jdXd4ZW1mc1BtWXFkaDgxQmJ1UG5vYmRSMDNGN21PbVlKZVJPK0hXWlkvaEIwLy9HYTlzV1dFdGM4OXh1MW56NnBiaGZVUDQ1MVpDaGdHQzJkRnFzbGRGTlJIKzhkbWlrOFJzbkpsejNUK2R0NGlLdGU3ZnE1OGQ5amxVSyt5eHRZdncrUWYvRzQrdWZjbDY1c203djgyaUcrR2ZUSVIvRmdrMkFJUi9mTGJvSkRFYlorWmM5L2RBeFR2MUgrVzlaT3RLL1B0VGY4RU5iendFTFpBN2YvenUrUGpzZjdUdW0wcUVmMjRsWkJnZ21GMWJRZzBBNFIrZkxUcEp6TWFaT2RmOTAvdm5JVy9oMzYvMUhWdndrMmYvaWorK2NqdTZ3ckpJeHZ6eHUrUFBSMzBETGFWbVM0NEc5dzNobjFzSkdRWUlaaWVUUUFOQStNZG5pMDRTczhuQjNJR0tYSCtkTkVaQy91MlZUdng2MFUzNDcrZXZ4dWF1b1QvVVkwZGptMGZpWC9kK1B6NDc3ejJFdjFNUi9yYU1MRGNBaEg5OHR1Z2tNUnVuNXM0ZUs2NzdaL0wzdEhjS2RZZ2IzbmdJNXo5MUNkN1k5cVpJUm5QUWhGTm5IWTJ2N3Z0aFRHNGJaOUdaOEs4dHd0K21rY1VHZ1BDUHp4YWRKR1pqWkc2YXpYVi9EMVRjZGY5N1ZqMk44NS82RTU3WnNGUXM0OWpwQzNEK1A1eUIyYU9uaVdVa0Z1R2ZXd2taQmdobXB6ZXkxQUFRL3ZIWm9wUEViSXpNQ3dGL3J2dm5FeTlUKzZMTmIrREh6MTZPNjE1L3NQWmdReDAwYVM2K2ZjRHBPSHp5WGtJSktlOGJ3aiszRWpJTUVNdzJNN0xRQUJEKzhkbWlrOFJzak13TDhXNjNFRVZHcUU0YUkwdGF1WDA5ZnZMYzVmanprcnZFdnU1Mzl1aWQ4Zlg5UDRJVGRqc01TdXlMZmdqL1JLR0V2M1dqakEwQTRSK2ZMVHBKek1iSVBFczIxLzA5VUhIVy9iZVZkK0QzaTIvRlQ1KzdFdHZLTzBReUpyU094dWYzZkQvT21uYzhXa3FTWDVkQytDY0tKZnhGakRJOHN3bi8rR3pSU1dJMlJ1YUZnTCswaW56cXZ4anIvbDFoR1pjdS9SdCs5TXhmc0taOWt4WFBvV29ydGVEVDg0N0RGL1krQ1dPYlI4S3I1eVRobjFzSkdRWUlabWMzTW13QUNQLzRiTkZKWWpaRzVvV0JQOWY5ODRtM1UvczlxNTdHTi85K0VWN2E5SVlWdjZFS2xNSjdkejBjM3pyZ05PdzJha3JQVm8rZWs0Ui9iaVZrR0NDWWJjZklvQUVnL09PelJTZUoyUmlaZS9UbUtGNkZLYlNLUElKUUR0NS9YLzh5dnZ2M2kvSGdtdWN0MUZOZGI1KzJINzU5d01leDcvaVpZaG5EbGRkemt2QlBVMEtHQVlMWjlveFNOZ0NFZjN5MjZDUXhHeVB6ck5sYzkvZEEvcTc3TDl1MkJ2L3g3S1c0WXVrOWtQanFYZ0NZTjNaWGZPdUEwM0RzOUFWVjloYjVPWmtzbC9DUEx5SERBTUZzdTBZcEdnRENQejViZEpLWWpaRjVZZUF2clNLZit2ZHozWDlEeDFiODhzVnJjT0dpRzlGWjZjcFNRS1IySGpFUlg1Ny9JWHgwOWp0UVVrR1ZFVVYrVGthSjhFOVRRb1lCZ3RuMmpSSTJBSVIvZkxib0pERWJJL05Dd1ovci92bkVwNS9jL2RXOU56cjQ2dDRQNERQemprZGJxU1ZpVkpHZms4a3lDZi80RWpJTUVNeVdNVXJRQUJEKzhkbWlrOFJzak13TDljYW9VTVVPVVpFaGxNNDcxTHJucTN2LzVPQ3JlMCsxL05XOWFVWDR4NFlTL3M2TmFqUUFoSDk4dHVna01Sc2pjeHZaWFBmM1FQNnMrOSt6Nm1sODk4bUw4ZXpHVjhVeWpwMitBT2NmZEFabWo5bzV3ZWdpUHlkclp4TCs4U1ZrR0NDWUxXaWtZeHNBd2o4K1czU1NtSTJSZWFIZ0w2MGluL3IzWTkzL3lmV3Y0SHRQWFlMN1ZqK1RKU3hXQjAyYWkyOGZlRG9Pbjd4M3dyS0svSnlzSnNJL1RRa1pCZ2htQ3hyMVRJbG9BQWovK0d6UlNXSTJSdWFGZzcrajUwWGg0Qyt0MnJVdjM3WVdQMzMrQ3Z6dmtqc1JhcG5iMnZmVnZUTU9UL0hWdlhYeW5JeklJL3pqUzhnd1FEQmIwR2pBbENvTkFPRWZueTA2U2N6R3lMeHdQQ3J5QzdrSHRSdVhFRDl4WStkVy9PS0ZhL0RyUlRlaG85SnBHaEtyQ2EyajhmbTllcis2dHpscGFRNUUrRWVHRXY3dWpZWk1hWXJkbXpFcmpRaC9PUnNqYzF2WlhQZjNRUG1zKzNlRlpmemg1VnZ4NDJjdnc2Wk9tU3Y3Kzc2NmQ1L2VyKzRkb054UC9SUCtrYUdFdjN1aktsT2FZdmRteUVvandsL094c2k4Y1BDWEZ0ZjkwMHgyY1dWL29CVGV1OXZoK05iK3AyRzMwVk9HRDhnZC9xNUYrS2NwSWNNQXdXeEJvNGdwVFRVTkNYL3BTV0kyUnVhRmhIK1JYOGpycTNZWFYvWWZzWDR6dnZ6Y3k5aHI4OTBBZm9RMUdielV5REVvVFptTjFnWEhvZTJZMHhHTW5XU3BTcGVQSytHZnBvUU1Bd1N6QlkxaXBxak9XMlpFN3liOHBTZUoyUmlaVzh4dU9mNDFHZU5oS3ZLcGZ3OGFJMHZ2L2wxYzJiL0hsdTM0MGt0TGNOVHE5U0wrYXRRNGpENzlCMmg3eXdjek90bC9YRHV1MnlOUkZ1RWZYMEtHQVlMWmdrWTFwa1IvREpEd2w1NGtabU5rTHBaZEorOXdDM2N6M01EZnhaWDlVOXM3OE5uRnIrT2tOMWFoSkpRQkFIcmJKbXk1OEY4UnJsK0ZrZS85RjFNWHF6WEZXeEwrYVVySU1FQXdXOUFvd1pUcURRRGhMejFKek1iSXZMRHdkM1JtZ2V2K3d5WnY2TmlLLzN6dXI3am81VnZSRlphem1FVnFqQTd3ejR0ZXdlbExWNkMxVWhISkdDYXRzZTJ2UDBCcDJteTBIbnk4bTh6WWVwTHRJUHpqUzhnd1FEQmIwQ2pobE9FTkFPRXZQVW5NeHNpYzhNOUJ4YTI5Syt3U3Y3Sy9PV2pDS1ZNT3hGbVgvQklUT3pwRU1tS2xOYmIrOGF0b21YOFUxSWhSYVNhS2xSU1hRL2pIbDVCaGdHQzJvRkdLS1lOL0NvdndsNTRrWm1Oa1hsZ09jZDAvazc5QkNhSFd1TzcxQjNIRWpWL0FONSs0U0FUK0NncnZtM0VFN2p2K3B6aC8yZFo4NE4ramNOTWF0UC90NGhRelhKMzZKL3pUbEpCaGdHQzJvRkhLS2YxbkFBaC82VWxpTmtibWhZVy90TGp1UDFUZFYvYi9VZlRLL2tOMjJoUGZQdkIwSExMVG5nQ0E5Yy8rVFN3cnFUb2V2UkVqampzN24vQ3FyNG1FZjVvU01nd1F6QlkwTXBqU1pEb3hqUWgvT1Jzajg4S0JiYUM0N3U4cXZ2dksvaitKWHRrL2QreXVPR2ZmRCtOOU13NGZ0RDFjdDF3c002bktLeFlsSEduNWNTWDhNNWVRWVlCZ3RxQ1JZWFlUNFM4K1Njekd5Snp3ejBrZW5QcFBxUDRyKys4UXU3Si81NUVUOGVYNXArQ2pzOStCa2hyK25mMjZmWnRJYmhycDdadVRqQkt2STNVaTRXODZRREJiMENoRGRvMmZBODRtd2wvT3hzaTh5UHprdW44Mi93UkR1cit6LzJyUjcrd2YxVFFDWis5MUF2NTE3L2VqcmRTU3JEQnZKYjN1UDl5ZjhJOHZJY01Bd1d4Qm80elpZZzBBNFM5blkyUmU1TmRaY1RYMnVuLzNkL2JmSW41bC82bXpqc2JYOXZzSWRtb2JsNnl3UmhQaG42bUVEQU1Fc3dXTkxHU0xOQUNFdjV5TmtYbmhYMmU1N2k4UjMvK2QvUmVMZldlL2dzSUpNdzdIdWZ0L0RETkhUeFBKeUVjdTF2MVRwQkgrcGdNRXN3V05MR1ZiYndBSWZ6a2JJM1BDUDBkNWNPby9RdTZ1N1A5NDM1WDlnOFhIMVpvSWY5TUJndG1DUmhadmx0VUdnUENYc3pFeTkreDFLcjI0N3AvSnY4b1F0MWYySDVHOHNNTEkvYnAvOHJtdVJQam5abVQ1WmxsckFBaC9PUnNqYzY4UFRoL1VXT3YrN3Evc0R5SkdGZTdPbGhYaGIxeENoZ0dDMllKR0FqZkxTZ05BK012WkdKbDdmWEE2TjRyM3J2TjEvM3l1N0s5WHVWMzNUejdYbFFqLzNJeUVibGJtQm9Ed2w3TXhNdmZpNE14YVJKSGZKWHB3Nmg5NVh0a2ZKejZ1VmtUNG13NFF6QlkwRXJ4Wm1Sb0F3bC9PeHNqY2k0UFRkL2pYOTZuL01QVDF5djdDM2RrRDVORzZQK0Z2T2tBd1c5QkkrRDQzYmdBSWZ6a2JJM012RGs3ZlgrU0xmT3EvdHZjOUsvTytzajlLdmo4dkhJdndOeW9od3dEQmJFRWpCL2U1VVFOQStNdlpHSmw3Y1hEYUtJTHIvaVo2Y3YwcitONlRlVi9aWDYvS3Q2a3pHV3BQaEg5dVJvN3U4OVFOQU9FdloyTms3c1hCNlR2OHBaWFB1bi9mbGYydjVIMWxmNXlLL0xnS3FEQjNCK0dmbTVIRCt6eFZBMEQ0eTlrWW1YdHhjQllCL3ZXMTd0OTNaZjlMdmwvWlg3ZzdXMVo1dmthbUV1R2ZtNUhqK3p4eEEwRDR5OWtZbVh0eGNQcjhJdGFySXAvNkgremRVZW5FaFMvZGlQOSsvbXBzN3BMNXRiem1vQW1mblBNdWZHbitoekNoZGJSSVJrMFY0V21WVm9SLzZoSXlEQkRNRmpSeWZwL3JaQTBBNFM5blkyVHV4Y0ZwcXdoSE42Wnc4QitzKzk5OEZsOTk5TmRZdkhtNWlMLzk3K3ozR1hKNXl1ZjdoZkRQelNnSCtBTUp6Z0FRL25JMlJ1WmVISnhGZ2I4bkYzQmw4SDl6eDBhYy85VEYrT3ZTdThXU3pLN3NqMU9HKzhablBwcXFFTGVKOE0vTktDZjRBelVhQU1KZnpzYkkzSXVEczREd0w4UUw4RUJwaEZyamlsZnZ4bmxQWElTTm5WdEZVbVN1N0NmOEI2a1FwLzRKLzl5TWNvUS9kRXdEUVBqTDJSaVplM0Z3K3ZvQ05sVEZYdmQvZHVPck9PZVJDL0g0dWtVaUNkbXY3QmRRVVo1YWFVVDRweW9od3dEQmJFR2puT0VQUkRRQWhMK2NqWkc1RndlbnpTSjhmVEZNSXJuYXQ1ZmI4Wi9QWFk3L2VlRTZWSFJvM1YvK08vdUwvTGcyb2dqLzNJdzhnRDlRcFFFZy9PVnNqTXk5T0RpTEJIL0pkLzl5dFYvL3hnTTQ3NG5mWStYMjlkYTkzVnpaejFQL2crVDl1My9DUHpjalQrQVBER2tBQ0g4NUd5TnpMdzVPSDErOG9sUzhkZi9YdDc2SnJ6LytHOXl4NG5IcjN2MVg5cCtHbWFPbld2ZnZGK0UvU0lSLzRoSXlEQkRNRmpUeUNQN0FnQWFBOEplek1UTDM0dUMwWFlUczJybHNqRjNUcnJDTVB5eStCVDk4K2kvWVZ0NWgxUnZvdmJML2pKNHIrMzJFRUx3dEs1TUkvOFFsWkJnZ21DMW81Qm44Z1o0R2dQQ1hzekV5OStMZ0xCTDhwV1czOW9mV3ZJQnpIcjBRTDIxNjNhb3YwSHRsLzZrRHJ1eDN1T1JDZVM3Q1B6Y2pEK0VQQUUyRXY1eU5rYmtYQjJmUjRGK01kZitOblZ2eC81NjlETDliZEpQMTcrN3Z2N0wvSHgxZTJjOVQvNFBrOWJ0L3dqODNJMC9oRDhSOUR3RGhMNkJHaEwrMC9GLzMxOUQ0eTVLN2NQNlRmOFNHRHJ1ZjZXOHBOZU5mOW5vLy9tMmZrNnBjMmU5b3ljWGhWRzlGK0NjcUljTUF3V3hCSTQvaHJ4SFZBQkQrQW1wVStEZjJ1djhybTFmZ3E0LzlHdmV1ZnRwQ1BZTjF4T1I5Y01FaG44RzhzYnRWMmVzYmhIcVVxQ3hQYTQ4UzRaK29oQXdEQkxNRmpUeUhQMUN0QVNEOEJVVDRGMC9aYW0rdmRPSy9YN2dhUDMvK0tuUld1aXpWMUszeExhUHh6UU5PdzJsN3ZCTUtxc3FJSXEvN0YvazU0NXNJLzl5TUNnQi9ZR2dEUVBnTGlQQ1hrYi9yL3JldmVCemZlUHczZUgzcm01YnE2WmFDd2dkbnZSM25IL2hKVEd3ZFk5VTd1WGpxZjVDOGZmZFArT2RtVkJENEF3TWJBTUpmUUkwS2YybjV1ZTYvZXNjR2ZFL29oM3YyR1Q4VEZ4ejhtUVEvMk9QcHUzT2UrbmNvd2o4M293TEJIK2h0QUFoL0FSSCtNdkp2M1QvVUd2Lzd5aDM0N3BOL3hKYXU3VmFyR2RIVWlzL3ZkU0wreno0bm96bUkvL0ZPdmVwRmhJOWNpdkNWKzZBM0xBYzZMZFhTTmdacTBrd0U4OStGMHFFZkFVWlBURGVmOExjWmxteXNGNjh2eGdNRXN3V05DZ1ovQUdnaS9DVkUrQmRUNmUrVHB6Y3N3VmNldVJCUHJsOXN2WnBqcHgrTS8xaHdKbllkTlRsK1lMa1Q1UnUraS9EaFB3TUN2eUdBOWkzUXk1OUJaZmt6cU56N0d6U2Q4QjBFQjczZllnQ2ZpOUVpL08xbEN4b1ZFUDdBb0dzQUNIOG41bDRjbkVWOXdmVm4zWDl6MXpaYzhNeWwrUDJpbTYzL2NNKzBFUk53N3Y2bjRaUlpSOWNlWE81RSthS1BJM3psUWFzMVJHckhKcFQvK2lXVXRxeEM2YWpQMWg1ZjFLZGFuSnk5YVNMODdXVUxHaFVVL2tCZkEwRDRPekgzNHVBczZpdXlQK3YrdHkxL0ZGOTk3TmRZc1gyZFZkOG1WY0luNTc0Ylg5dnZJeGpkUENMUm5QTDEzM1VILzE1cGpjb3RGM1F2Qyt6NzdwaHhpY3hzVmVWR1hxNzdFLzY1R1JVWS9nRFFSUGpiRXVFdkp6L1cvVi9kc2dwZmUvelhXTGp5U2VzVkhEQmhOaTQ0NUxNNGNPSWVpZWQwci9uLzJYb3R5Y0kxS3RlZWgyRHUyNERXVVZYMkp6S3hYWldzdkZ6M0oveHpNeW80L0lHNGJ3S1VFT0h2WG9XSHY3UnEzeTlkWVJtL2V2RjYvUGpaeTlCUjZiU2FQcTVsSkw2eTc0ZnhxYm5IcC80SzMvRFJTMlhXL0JOS2IxbUx5aU4vUWVsdForWldRMzJLOExlVExXaFVCL0FIWERZQWhMOTcxUVg4OHozMS8rQ2E1M0hPb3hkaTBhWTNySHUvYjhZUitPRkJuOFpPYmVPTTVvZUw3N05ja1VFTno5dzh2QUhndTM5YlFiWEhlZkg2WWp4QU1GdlFxRTdnRDdocUFBaC85OG9UL2hJSHArTlQveHM3dCtEN1QxMkNTMTYrQTlweStLd3hPK00vRGo0VFIwODlNSU9MaHQ2MHdscE54bFdzZVhuSWhrU3pKRXFSazNmci9vUi9ia1oxQkgvQVJRTkErTHNYNFovT2Y5QldqYjh1dlJ2Zi92dEZXTit4eFdwaWM5Q0V6KzcxWHB5ejc2bG9DWm96T1BYVTNySE5TbDJadEdOei83OEpmNXRoOFdPOGVIMHhIaUNZTFdoVVovQUhwQnNBd3QrOTZnTCswcXBlNlBNYlg4VTVqMTZJUjllK1pEM3hMVlBtNDRKRHpzTGNzYnZFbFpCQWhibVRxVlFpL0xObkN4clZsQ3B5V3dBQUlBQkpSRUZVSWZ3QnlRYUE4SGV2dW9HLzIzWC9IZVVPL09MRmEvQmZ6MTJKcnJCczFYdktpUEU0NzREVEIzK212eDRaWG8vdi9nY3A3OW9KLzl5TTZoVCtnRlFEUVBpN0YrR2YzaC9kbituLyt1Ty94Ykp0YTZ5bTlQNXd6L2YrNFZPWTBEbzZLajZsOG9aUWhBaC9OLzVldkw0WUR4RE1GalNxWS9nREVnMEE0ZTllZFFOL2FkOSswNVhiMStPOEozNlA2OTk0d0hySy9QRXo4ZU5EejhLQ1NmT2k0ZzFFZ09ZandwL3dkeVczOEFkc053Q0V2M3ZWRmZ3bGIwTzNkMWxYY05HaW0vRWZ6L3dGVzd0MldFMFkyZFNHTDgzL0VNN2Urd1EwcVpKRjV5SURsSXBXQVI1WHd0K1IzTU1mc05rQUVQN3VWYS93RjdvNVQyMTRCZWM4Y2lHZVhQOXk3Y0VwZGV6MGcvR2pneitOWFVidFZIMUFBVjdyWmRTd043ejRJdndkS1IvNEE3WWFBTUxmdlR5R2YvcUtaT0cvcVhNcmZ2enNwZmpkb3BzUWFyc0IwMGRPd3ZjUCttZThaN2ZEb2dmeDFEODFUSjdmTjRTL0krVUhmOEJHQTBENHUxZGR3VjlXMTcxK1A3NysrRyt3dG4yVFZkL21vQW1mbVBzdWZIMy9qMkJVVTdJZjdra3YzKzdOTkNweTdkTHkvTDRoL0IwcFgvZ0RXUnNBd3QrOTZnNytNdS8rbDI1WmlhOCtkaUh1WHZXVVBkTWVIVFo1YjF4d3lGbllhOXh1dFFkNy9scFB1WmJuVHdqQzM1SHloeitRcFFFZy9OMkw4SytwemtvWGZ2cjhGZmpGQzFlanM5Smx4N1JIRTFwSDQxc0hub0dQekg0SFZKSUpQUFZQRlVtRXZ5UDVBWDlvMHdhQThIZXZRc0UvU1kzMjRiOXF4d1o4OUcvbjQ3bU5yOW94N0pHQ3dxbXpqOEczRGp3REUxdkhJRkhCaEQ4MVRCN2ZONFMvSS9rRGY4Q2tBU0Q4M2F2dTRHOWZuWlV1RWZqUEc3Y2JMamprTEJ3eGVSK3J2dEh5R0JJMVZlVGFwZVh4ZlVQNE81SmY4QWZTTmdDRXYzdlZKZnp0di91LytKWGJyY0ovUkZNcnZyalBCL0c1dlU5RWN6RHdNSkYrOTAvVm56eCtRaEQranVRZi9JRTBEUURoNzE2RWYySmQrZXJkMXJ6ZU9YMEJmcmpnMDVneGVzcVFQVHoxSDYwaTE5NmdJdndkeVUvNEEwa2JBTUxmdlFqL1ZIcGgwMnVaUGFhT21JQnZEdjNobmo0Ui90RXFjdTNTOHZTK0lmd2R5Vi80QTBrYUFNTGZ2ZW9TL3JKU3lhN0xyNnBBS1h4c2ozZmkyd2VlZ1RITkl5MVdsVlIrM0llVWJYbjZ1QkwranVRMy9JRmFEUURoNzE1MUMzKzVkLytBeGw3amRzTVQ2eGFubm5uZ3hMbjQ4YUZuWWY4SnMyUDlFNVJBVVFQazZST0M4SGNrLytFUDZKZ0dnUEIzTDhMZldDZlBQQ3BWQXpDMmVSUyt2djlIOFltNTcwYWc0czRlOE5RL1ZTY2kvQjJwR1BBSGdDRDlSS00wNXpaRzVvUi93dDArd2IvYjlPTjdISXY1NDJjbW12SCszZCtLKzk3emMzeHEzbkUxNEo4NFBvL0psTGZ5OEhFbC9CMnBPUEFIcWpVQWhMOTcxUzM4cGRWZlMwdXBHWDgrK3J6WUptRFdtSjF4MlRIZndvVnYrUkttanBpUXl0KytmTG9mZlZPUjd4c1BheWY4SGFsWThBZUdYZ05BK0x0WFhjTmZkdDEvcUthTm1JQmIvdWxIdVBpVjIzSGxxM2ZqaFUydkF3RDJIamNESjg4OENxZnY4VTYwbGxxTS9VMkdVR2xWNUR2Vnc5b0pmMGNxSHZ5QmdRMEE0ZTllaEw5MXRaU2FjZWE4NDNIbXZPTXp1SERkbjZvREVmNk9WRXo0QTcxTEFJUy9lOVUxL08xTWRXenFLSjd3ajFhUjd4dlBhaWY4SGFtNDhBZUFnUERQUVkwQ2Z4RkoxOE4xLzN4VTVQdkdzK2NrNGU5SXhZWS9FUFVwQVBNMDV6Wkc1b1Ivd3QwWmF5emNhenJYL2ZOUmtlOVV3dCsrTmVGdlVvWkpjc29HZ1BEUEpNSS9vM0orZDg1VC81UlRFZjV1c3cwQ0N3eC9JRlVEUVBoblVpUEJYMFJjOTY5UEZmbSs4YWgyd3QrUjZnZitRT0lHZ1BEUEpNSS9venc3emVxTmQ5RlY1UHZHNFhPeVZoVGg3MGoxQlg4Z1VRTkErR2NTNGUrNXVPNmZqM2luUm92d2Q1ZHRFRmduOEFkcS9ob2c0WjlKalFwL3F6Zlg3bjBYYm53ZTVjVi9RcmppSG9UYjNnREsyNno0cXBheFVLTm5vVFRqUFdpYWV3WlUyeVFRY3ZVcVIyZU1DSC9oYklQQU9vSS9FTnNBRVA2WlJQajdaVmJwUU9kajU2Szg2SStBRHUzNTlraDNib1plL3hUQzlVK2gvUHd2MFh6SUQ5RTArMFBXY3dZa0NucExpN1ZuRnVIdlNQVUxmeUN5QVNEOE00bnc5OHVzMG9HT08wOUJaZFY5OWp4anBEczNvZlArejBQdldJbm0rVitRU0JEd2RDWFduc2cvTG9yd2Q2VDZoajlROVJvQXdqK1RDSC92MVBuWXVjN2czeStOcmllK2o4cnJOMXIzTGE2S1hMdTBDSDgzMlFhQmRRcC9ZRmdEUVBobkV1SHZuV0c0OGZudTAvNjVTS1B6a2E5QWQyM05LWit5SncvVy9RbC9SMm9NK0FPREdnRENQNU1JZnk4Tnk0c3ZFVm56VHlxOVl3M0tpeSsyNVdiSkp3K3hkdGtTQ0g4N2FoejRBMzBOQU9HZlNZUy9yNFlJVi83TnVtZGFWVjYvd1lLTEJ4QXlGbXRQNUc4Y1JmamJVV1BCSHdBQ3dqK2pDSCt2Rlc1YmxuY0owSnRleXVwZ3BZNThWT1RhcFVYNHkyY2JCRFlJL0FHakh3T3FJc0kveCt5a3UzMkh2OUI5MkdYbmMvNVpwRHMzNTEwQzVaMElmL2xzZzhBR2dqOWdvd0VnL0hQTVRycTdRZUZmRnlyeWZWUGsybjBYNFc5SGpRdC9JR3NEUVBqbm1KMTBOK0ZmWEJYNXZpbHk3ZExLK3U2ZjhMZWp4b1kva0tVQklQeHp6RTY2MjNmNFM2dVFSZmVJdGRlbkNIL1piSVBBQm9VL3RHa0RRUGpubUoxMGR4SGdMM2svRWtLVWJ5TDhaYk1OQWhzWS9vQkpBMEQ0NTVpZGRIZWp3Ny9vS3ZKOVUrVGFmUmJoYjBlRS8wRDdkQTBBNFo5amR0TGRoSCt4SWNUYTYxTlozLzBMaWZDdk5WSzBETWZKdyt5VE53Q0VmNDdaU1hjWEFmN1NLbXpoS0hidFZMUUlmN2xzZzBEQ3YwL0pHZ0RDUDhmc3BMdUxBbitmWGdFcGUrTGpXbDJFdjF5MlFTRGhQMGkxR3dEQ1A4ZnNwTHNKZnpmK2ttTHRsQ01SL3JWR2lwYmhPRG5XUHI0QklQeHp6RTY2bS9CMzR5K3BJdGN1b0xxNU96eDg5MC80MXhvcFdvYmo1SnIyMFEwQTRaOWpkdExkUllHL3RJcGNmSkZyRjFEZDNCMkV2MHkyUVNEaEg2bnFEUURobjJOMjB0MUZncjh2cjRCMXBIcThTM21iNUVUNDF4b3BXb2JqNU1UMnd4c0F3ai9IN0tTN0NYOTMvcElxY3UxVXREeDdYQW4vV2lORnkzQ2NuTXArY0FOQStPZVluWFIzRWVEdjZuNzA3SVUybFRMVVh1U2JIU1VkK1VmQjVObXBmOEsvMWtqUk1od25wN2J2YndBSS94eXprKzR1R3Z3bDc5TUUzajY4QUZjVjRUOUloTCtNQ1A5YUkwWExjSnhzWkIrWVRrd3V3ajgrTytsdXdqK1ZmSGdCdHEyNnYwMzFlQU56RXVGZmE2Um9HWTZUamUwRHdwL3c5OXc0NXl6YktuTHRWTFFrMy8ybk5DVDhhNDBVTGNOeGNpWjc4NThEcmluQ1B6NDc2VzdDUDNXV3Q0emxxZjlCcXB0My94NmQraWY4YTQwVUxjTnhjbVo3b1FhQThJL1BUcnFiOEUrZGxmY0xjS1FJLzBFaS9OUDdXeHhxM1lqd2Q1MXN4VjZnQVNEODQ3T1Q3aWI4VTh1emNxeW9IbS9USU5YOURjd2d3cjltSU9HZnljUnlBMEQ0eDJjbjNVMzQ1NTlIaWFsdUhrcFAxdjBKLzFvalJjdHduR3dOL29EVk13Q0VmM3gyMHQyRXYxRmUzVUJsZ09yK05oWDVCbnF5N2svNDF4b3BXb2JqWkt2d0I2dzFBSVIvZkhiUzNYVUNmNnZaaEgvZGlQQlA3MjlobUlnUjRlODYyVHI4QVNzTkFPRWZuNTEwTitGUHBWR1I3K2dpMXk0dHdqODJrUEMzYXBLeEFTRDg0N09UN2liOC9jbjBRTHhOSHN1RGRYL0N2OVpJMFRJY0o0dkJIOGpVQUJEKzhkbEpkeFArL21SNm9FUzNxV0EzbktmK1JVcHdia1Q0dTA0V2hUOWczQUFRL3ZIWlNYY1QvdjVrZWlEQzMyTjVzTzVQK05jYUtWcUc0MlJ4K0FOR0RRRGhINStkZERmaFQ2VVY3K3o2Rk9FZkdVajRpNXFrYkFBSS8vanNwTHNKZi85eWMxYmQzNllpMzBBUDF2M3p5aUw4WFNjN2d6K1FxZ0VnL09PemsrNG0vUDNMelZrODllK3hQRmozdHlMQzM2UU14OGxPNFE4a2JnQUkvL2pzcExzSmYvOXljeGJoWHd6bDlaelBLNGZ3ZDUzc0hQNUFvZ2FBOEkvUFRycWI4S2RNeER1OFBrWDRWdzBrL0oyYTFHZ0FDUC80N0tTN0NYOS9zM05VM2QrbU9ybUJoYjBaaEw5SkdZNlRjNE0vRU5zQUVQN3gyVWwzRS83K1p1Y29udm92aGdwNzZwL3dOeW5EY1hLdThJZU9iQUFJLy9qc3BMc0ovOHpLbE8wcGhBai9CaGJoUHl5UThIZHYwak90U2dOQStNZG5KOTFOK09kclhtUUlGYmwyS2xxRS83QkF3dCs5eVlCcFFlUWVpM2xXUlBoYlZnSGdYNDhjclB2YlZJODNzQ2dpL0UzS2NKenNEZnlCUVEwQTRSK2ZuWFEzNFo5L3ZxY1Fxc2RULzROVTVOcWxKWDNmRVA0bVpUaE85Z3IrUUY4RFFQakhaeWZkVGZoYkVlRmZRQlc1ZG1rUi9vUy9MWHQ3OEFlQWdQQ3ZsWjEwTitGdnJRWXZ2U25LUklRLzRXL0wzaTc4Z1ZyZkEwRDRKOXhOK0JlbkJsOVY1QnRlNU5xTExNTGZwQXpIeWQ3Q0g0aHJBQWovaExzSmZ6OXFLREtFaWx3N0ZTM1B6bllSL3E2VHZZWS9FTlVBRVA0SmR4UCsxa1Q0VTNVbHdqOXBOdUV2WUpKdzJ2QUdnUEJQdUp2d1R5N1BYZ3dwU2xTZVBkOEpmOWZKaFlBL01MUUJJUHdUN2liOGs4dVhPbnhVdzk3d0d1TDlVbDJFdjBrWmpwTUxBMzlnWUFOQStDZmNUZmduRjlmOW8xWGsycWxvU1QydWhMOUpHWTZUQ3dWL29MY0JJUHdUN2liOHJZcndwNGFweVBlTlI3VVQvcTZUQ3dkL0FBZ0kvNlM3Q2Y5MDhtTWRWTFdNRWF3allRM05vMldNMi9LL2JXaXplZHY2SDFjMU12L2Jwa2FrdVcyRWY1SnN3bC9BSkVOMi9QY0FTSXJ3dHl5ZjRKOUFqbXBSWS9kMEV4Ulh3NmhkQi94bDc0YXJLWE9zZVJuWE1HNjZpRy9UOUxraXZtbFVtclJMM2lYMEtNVnpodkIzblZ4WStBTjVOUUNFdjJVMUV2elRUUzd0L3Q0c1lWWVU3SHgwejcvc1BnakIvSGRiOVRPcVljNlJscHdHM3pjdEJ4OXZ5ZGRjemZQZm5uQ2tIMmU3Q0gvbnlZV0dQNUJIQTBENFd4YmhINmVtdVIrSGF0c3BTMmcycVJLYTVwd0dpUWVoZE9oSG9FWlBzdTZiV0VFSndTRWZ0bUEwL0w0WmNmVHBDTWJrK0xnRkpZeDQrMGNTRFBUazRDTDhYU2NYSHY2QTZ3YUE4TGVzZ3NFL2s4eHVpR29lZzVaRGZ3eEEyUzBub1pyMi9CU0NjZk5rek50R28zVGk5d0NWejIwckhYYWFoV1dJNm8rckdqRWFvei94dzl4dTI0aC8vQVJLdTlSNjNLUVByb1QraEwvcjVMcUFQK0N5QVNEOExhdUE4TStwbnRMdTcwWHpRZCtFNnlhZ3RQUGIwWExRZHlCNXc0TjkzNFhTdTc3aUhKVEJIa2VpZFB6WFJETmFEejRlb3o3MERlZTNyV1grMnpENjFHODZ6Und1d3QvY25QQlBLamNOQU9GdldZMEcvK3czcG5uK0Y5Qnk1UDlBdFk3UDdGVlRxb1NtdlQ2TjFtUCtBZ1JONG5HbG84NUMweWsvQVVhT0U4OUNVRUxwaURQUTlJbmZBcVhtakdhMUg5ZVI3L2tjeG43bTUxQ2pIVHh1UVFramp2MW5qUHZTeFFsdW13Y0hHT0h2T3JtdTRBOEFxdVA2WFdUdk1jTGZzZ29BZjYzUityNVhoMnd6TnN0WXpCQzM5blVvdjN3eEtxL2ZCTDFsQ1hUblpqdkd6YU1Rak5vTndjN0hvR25PeDNwTyt6cytSYngxUFNxUFhvYncrZHVnMTcwSzdMQjAyMXBIUW8zZkZjSGN0eUk0K0JSTG56NUlkOStFbTllaC9lNC9vK1B4bTFGWnZSUjZ1NTNicHRwR29yVFRibWplOXlpTWVOdXBDVTc3QTNtYyttKy9aazZ0SWNJaS9Pc04vb0IwQTBENFcxWXg0QTlnY0FPUTg3dC9FZTlFVXoydFBaRmx3V3FQOHJjZWxjKzYvNkFHZ1BCM25WeVg4QWNrbHdBSWY4c3FEdndIYjh0a21HV3luRGZoNzdFazRTOHRINDl4d3I5ZTRROUlOUUNFdjJYNStNSXdOTDlJOE0rZzNPRXZJS2Z3ZDlRWWljVGsvTGdTL3E2VDZ4citnRVFEUVBoYlZrSGhuODNRc3A5TC95TFhMaTNXYnV4UCtMdE9ybnY0QTdZYkFNTGZzZ29NLzd6cmlwVDBxWDlKRmZuVWY1SFgvYVhsVzhHRWZ5UEFIN0RaQUJEK2xsVmcrR2N6RmZDMDRNMVQveDZyeUtmK2ZUdk9DZjlHZ1QrZ0xUVUFoTDlsK2ZhaVVDMi9hUERQSUMvZ2I5bWY2LzdwL2ZNUTRlOHl1YUhnRDlnNEEwRDRXeGJoTHlOUHp5eDQ0UzhwMXA2ZmZ4b1IvbzBHZnlCckEwRDRXMWFqd2w5YVhQZVB0cXlUeGlqM3h5bXRmRHJXQ2Y5R2hEK1FwUUVnL0MzTHB4ZUVxSHlwQWp5RmtCZW4vaTJMNi83cC9mUHdKdnhkSlRjcy9LRk5Hd0RDMzdKOGVrR0l5aThpL0RQSUMvaHozYittZCtIZzcxTTg0ZC9JOEFkTUdnREMzN0lJZnpsNWVtYkJDMzlKc2ZiOC9KT0s4RzkwK0FOcEd3REMzN0lhR2Y3UzRycC90R1dkTkVhNVAwNXA1Y3Z4VHZnVC90MUszZ0FRL3BibHk0dEJYSDVSUWNGMS8wSGl1bjk2L3p5OENYOFh5WVQvQUNWckFBaC95L0xseFNBdVAyTUJZV2VjZVRadktYa0JmNjc3NXhQajZYTVNBTUlPUzBhRVArRS9XTFViQU1MZnNob0EvZ0IwMTlhb1BabTlheVFMKzB1S3RlZmo3MEh0TVVOMGVadmRHZ2gvOXlZZXdoK28xUUFRL3BiVkdQQUhBSFNzdHVPVFNrVSs5YzkxLzBUK2VSOGZxV1hobUk5c3BnMXFJUHpkbTNnS2Z5Q3VBU0Q4TGF1QjRBOUFiMTVVYmFzMWY2dmV1Y05mUUZ6M1QrK2ZoM2VTSWR1WDJhbUI4SGR2NGpIOGdhZ0dnUEMzck1hQ1B3Q0VtNThkR21EVjM1cThnRC9YL2ZOUk1XclhXNWFZenF6Nnp4b2o3WXZ3ZDZEMDhBZXFOUUNFdjJVMUh2d0JJRnh6MzhBQTYvNkRsZmNkbUVXc1BaRy85U2dQbnBNSlN3ZzN2NUF0bi9CM2IxSUErQU5ER3dEQzM3SWFFLzRBb0RlL0NMMWpsWWoza0NUaHFaNHVXeVN5elB2SmxVVU52dTQvUU9HYWg4enpDWC8zSmdXQlB6Q3dBU0Q4TGF0eDRkOWpqbkQ1MWNqL1JrWW9kL2dMcUc1Ty9YUGR2Mi9vOXVYUTIxNHp5eWY4M1pzVUNQNUFid05BK0Z0V284Ty9XNVhYLzRyY1gyeTk5SmIyTDNMdDBpcFc3WlVWTjZVWVRmZ1QvdWtVRVA2MlJmajN4V3hiZ25EMVFpbjNYS2Jha2ZTcGYwbHgzVCtUZjhvU0ttOWNtejZiOEhkdlVrRDRBMzFMQUlTL00rTzg0ZVA0dS8zTGkvNUx3SlhyL3RHV2VUL0Jzb2pyL2dNVnJuOGNldE9MNmJJSmYvY21CWVUvQUFTRXYwUGp2Ri9VY3ZoaEg3M3hhWVFyYjNhZVcxVzV3MTlBWFBkUDc1K0hET0xMTC8weW5USGg3OTZrd1BBSFRINE9PS3NJLzN5VTQ2LzZsWi85SGxEZWJzbXRZTy9PbmZwTGlyVzc5QS9YUDRGdzlUM0pjd2wvOXlZRmh6L2d1Z0VnL1BOUm5qL3Bxd0c5WXlYS0wvN0VqbGtPVSsyb3lLZit1ZTZmeVQ5dENicUM4bFBmVFc1SytMczNxUVA0QXk0YkFNSS9IK1VNLzE1VmxseUU4TTI3N1ppSlRDMFlRTG51NzRGa2p2L3lrb3NSYm5vdW1Tbmg3OTZrVHVBUHVHb0FDUDk4NUFuOGV6ZVUvLzUvb1hlc3pMa080MEgraU92KzZmM3prRUY4dVBGWmxKLzdmOGxNQ1gvM0puVUVmOEJGQTBENDV5T3Y0Tit6dVdNdHVoNytGRkJPKyt0bUJYdDM3dFJmVXF6ZHBiL3UzSUN1Ui84TkNEdHFaeEwrN2szcURQNkFkQU5BK09jakQrSGZ0M3Z6aStoNjlHeWdFdlVpbDlKUWFLb2RGZm5VUDlmOU0vbW5MYUhTanE0SFB4M3pyWCtFUCtGdlgzSU5BT0dmanp5R2YrK2djTTI5Nkhya1RLRFNic013VXkxeUtqTDhwY1YxLzBHcXRLUHprYk1SYm5peXRpSGg3OTZrVHVFUFNEVUFoSDgrS2dEOGV4V3V1UmRkRDU0TzNiRSs5MW9LSWE3N3AvZlBReW5qZGVjR2RONTNHc0xWOTlZMkpQemRtOVF4L0FHSkJvRHd6MGNGZ24rdnd2V1BvdXVlOTBGdnJ2WnRad1Y3ZCs3VVgxS3MzWlYvdVBGWmRONzlRYjd6Rjdjbi9LTmt0d0VnL1BOUkFlSGZ0MmZITW5UZWV5SXFyL3dXMEdFYTB3ejFTS3JJcC82THZPNHZMWXV2QTdxQzhpc1hvZk9lRDNQTlg5eWU4SStUNnJodWVobEFLYk1UNForUENnei9vUW9tSFlxbWZjK0RHcmV2Ri9VSUZtRm9WN0Rhbzd3TGQrcmYzdXRBdVA0SmxKLzZMai9ubnlsYjJLUkI0QStnb2pxdW03NFZ3S2hNTm9SL1Bxb2orUGRKQlNqdCtqNlU1bndlYXN5Yy9PdEpKY0svcG5maDRKL0FQMEY4dVA1eGxGLzZKYi9lTjNPMnNFbmp3QjhBdHF1TzY2YXZBekRSMklMd3owZjFDUDlCVWdnbXZ3V2xHYWNpbUhJMDBEdzZZMXdCQWNwVC8rbThSV1QrV3FDM0wwZGx4YzJvdkhFMTlLYVgwbVVSL3U1TkdnditBTENoQ1VDdHoySkZpL0RQUjNVUC8yNlBjTTM5Q05mY0R3VE5DSFk2SEdyOFB5QVl1eGZVMkhsQTAxaW81ckZBcVRYL3g0UHdUK2FmKytPVVZna0tyblJDVjdZREhSdWhkNnlBM3JJRTRlWVhFSzU1S0daOXYwWVc0ZS9lcFBIZ0R3Q2RUVkRZWVZRQTRaK1BHZ0wrUXhSMmRYOU1hdlc5cUZneDFERi8xUnp1U0RySDdNRWxaQmdnbUMxbzVQdytKL3dKL3h5azBSRkE2M1VHRTFQdUp2eXRxQkhoYjkyVzhFOVRRb1lCZ3RtQ1JvUy82MlRDUHc5MVozY0VnRnB0TURIRmJzTGZpZ2gvNjJhRWYzd0pHUVlJWmdzYUVmNnVrd24vUE5TYnJiQXgwRUR5Qm9Ed3owZUV2M1V6d2orK2hBd0RCTE1GalFoLzE4bUVmeDRha0swMDFnWUtPbGtEUVBqbkk4TGZ1aG5oSDE5Q2hnR0MyWUpHaEwvclpNSS9EdzB2WlYyZ2xhcjlBKzJFZno0aS9LMmJFZjd4SldRWUlKZ3RhRVQ0dTA0bS9QTlE5ZXgxQVVMOWlzSEVtTjJFdnhVUi90Yk5DUC80RWpJTUVNd1dOQ0w4WFNjVC9ua29JbHZwY0cyQVVyZ283Y1RvM1lTL0ZSSCsxczBJLy9nU01nd1F6QlkwSXZ4ZEp4UCtlU2d5V3lNTXNEWm8zYjc2TlFBZHlTZEc3U2I4cllqd3QyNUcrTWVYa0dHQVlMYWdFZUh2T3Bud3owTXg4QWNBWFFsZURkUXBxQUJZa214aTFHN0MzNG9JZit0bWhIOThDUmtHQ0dZTEdoSCtycE1KL3p4VUEvNEEwTlNrbC9iOEhMQjZvZmJFcU4yRXZ4VVIvdGJOQ1AvNEVqSU1FTXdXTkNMOFhTY1QvbmtvQWZ3QjZOYnlsdGQ2R2dBOEVUOHh5cGZ3dHlMQzM3b1o0UjlmUW9ZQmd0bUNSb1MvNjJUQ1B3OGxnejhBckZTZlJIc0FBRG9JSHlQOGN4TGhiOTJNOEk4dkljTUF3V3hCSThMZmRUTGhuNGVTd3g4QVhnV0FBQUJhTzRQSDBrMG4vSzJJOExkdVJ2akhsNUJoZ0dDMm9CSGg3enFaOE05RDZlQVByYkVJNkdrQTFFbkwxNkduSTZnOW5mQzNJc0xmdWhuaEgxOUNoZ0dDMllKR2hML3JaTUkvRDZXRVB3Q29RRDBGOURRQVBYcW85blRDMzRvSWYrdG1oSDk4Q1JrR0NHWUxHaEgrcnBNSi96eGtBSDhBQ0hUbFdXQkFBNkNnRjhaUEoveXRpUEMzYmtiNHg1ZVFZWUJndHFBUjRlODZtZkRQUTRid0I0QXVwWjRHQmpRQUlVcDlEUURoTHlUQzM3b1o0UjlmUW9ZQmd0bUNSb1MvNjJUQ1B3OWxnRCtBVldNK3Z2Vk5ZRUFEMEhiaXNwY0J2RTc0QzRud3QyNUcrTWVYa0dHQVlMYWdFZUh2T3Bud3owUFo0QThOL1hUdnY0TWgreFlPSFdwTmhIOU8yZFlHQ1dXYm1SSCs4U1ZrR0NDWUxXaEUrTHRPSnZ6elVFYjRBMEFBUEREZzN3T2tjS3VKWVUwUi9qbGxXeHNrbEcxbVJ2akhsNUJoZ0dDMm9CSGg3enFaOE05REZ1QVBBQ29vVlc4QVd0cmJiZ0xRU2ZoYkV1RnYzWXp3ank4aHd3REJiRUVqd3Q5MU11R2ZoeXpCSDBDbHRiTzU3eE4vZ3hvQWRjcVNUWUMrTzYxanBBai9uTEt0RFJMS05qTWovT05MeURCQU1GdlFpUEIzblV6NDV5Rjc4QWUwZmtyOTg5b3R2WDhPdlFZQTBQcmE5SzdWZ3F5NG1Ca1QvallHQ1dXYm1SSCs4U1ZrR0NDWUxXaEUrTHRPSnZ6emtFMzRBNERDL1FQL0hOWUFoSlhTdGVidVBTTDhjOHEyTmtnbzI4eU04STh2SWNNQXdXeEJJOExmZFRMaG40ZHN3eDhBb0JZTy9HdFlBekR5NU9YTEZQQ2dzVC9objFPMnRVRkMyV1ptaEg5OENSa0dDR1lMR2hIK3JwTUovendrQW45MHRiYzMzVFZ3dy9BbEFBQWEraElqZThJL3AyeHJnNFN5emN3SS8vZ1NNZ3dRekJZMEl2eGRKeFArZVVnRy9vREMvUlBQMnJCcDRLYXFEVUJyUjlObEFEcFNtUlArT1dWYkd5U1ViV1pHK01lWGtHR0FZTGFnRWVIdk9wbnd6ME5TOEFjUWF0d3lkRnZWQmtDZHNtdzlORzVPN0V6NDU1UnRiWkJRdHBrWjRSOWZRb1lCZ3RtQ1JvUy82MlRDUHc4SndyL2JJUnpHOUtvTkFBQW9oVCtsY0JZUTRSK2ZiVzJRVUxhWkdlRWZYMEtHQVlMWmdrYUV2K3Rrd2o4UGljTmZ2ejdxNDl1ZUdib3ZzZ0ZvV2JYeWVnRExFemdMaVBDUHo3WTJTQ2piekl6d2p5OGh3d0RCYkVFand0OTFNdUdmaDhUaER5aW95NVVhYmhoOUJ1QXNkR21sZmxmVDJib0kvL2hzYTRPRXNzM01DUC80RWpJTUVNd1dOQ0w4WFNjVC9ubklBZndCUUlmcThtcGpJaHNBQUFoMTZVSkFkY1U2V3hYaEg1OXRiWkJRdHBrWjRSOWZRb1lCZ3RtQ1JvUy82MlRDUHc4NWdqK0FwU00vc2ZteGF1TmlHNEJSSjc2eEF0RFh4em5iRStFZm4yMXRrRkMybVJuaEgxOUNoZ0dDMllKR2hML3JaTUkvRDdtRFB4UndXYlhULzBDTkJnQUFkQkQ4VDZTek5SSCs4ZG5XQmdsbG01a1IvdkVsWkJnZ21DMW9SUGk3VGliODg1QkQrQU5BR0lhWFJZMVhTVXpicjl2NU1ZUllZRnhWckFqLytHeHJnNFN5emN3SS8vZ1NNZ3dRekJZMEl2eGRKeFArZWNneC9BRThQdXFNTFFkSHphbDVCZ0FBVkVWZllGWlNMUkgrOGRuV0JnbGxtNWtSL3ZFbFpCZ2dtQzFvUlBpN1RpYjg4NUI3K0FOSy96WnVYcUlHb0tWcjFaWFFXSnkycUhnUi92SFoxZ1lKWlp1WkVmN3hKV1FZSUpndGFFVDR1MDRtL1BOUUh2QUhkblJXbWk2Tm01dnNETUFwcUVEaEorbktpaFBoSDU5dGJaQlF0cGtaNFI5ZlFvWUJndG1DUm9TLzYyVENQdy9sQTM4QXVIVENKemR1akJ1UXFBRUFnTlp4clg4RTlJcWs0Nk5GK01kbld4c2tsRzFtUnZqSGw1QmhnR0Myb0JIaDd6cVo4TTlEK2NFZkN2aE5MWS9FRFlBNjV0VjJBRDlJT3I2NkNQLzRiR3VEaExMTnpBai8rQkl5REJETUZqUWkvRjBuRS81NUtFZjRRK1BSa1dkc2ViRFdzTVFOQUFDMHJsNzFHeWdzU1RObllFVTJob2lLOExkdVJ2akhsNUJoZ0dDMm9CSGg3enFaOE05RCtjSWZDdnBIU2J4U05RRHFMSFJwNlBQVHpPbXJ5TUlRVVJIKzFzMEkvL2dTTWd3UXpCWTBJdnhkSnhQK2VTaG4rQU5ZT21MazFtdVMrS1ZxQUFDZ3JXUFZKUUJlU0Q2RDhJL1B0alpJS052TWpQQ1BMeUhEQU1Gc1FTUEMzM1V5NForSDhvYy9BUDBUZFFvcVNUeFROd0RxRkZSVW9MNmViRFRoSDU5dGJaQlF0cGtaNFI5ZlFvWUJndG1DUm9TLzYyVENQdzk1QVgrc0dka3g5cUtrdnFrYkFBQm9mZCtLYXdIY2xyU2lMRU5FUmZoYk55UDg0MHZJTUVBd1c5Q0k4SGVkVFBqbklUL2dEdzFjb001YXNUMnB0MUVEQUFBSytvc0F5alVyaWhMaGIyT1FVUGIvMzk3Wnh0Wlpsbkg4ZHozdDJwN1RqUUY3SzFPRUR3VGlDNGJFZ0FJZkRBWVJKV0hyWnBvUW9iVFpzb1dYRURBeVFVMVlNRHBBQ1dFSUNTQ2FJQW9wYkdPSkdrd1VmSnVnaUE1UVZOQU1ESHNwZTlIMXROMXB0NTNMRDZ6WVF2ZTA1OXpQZmQvUDAxMi9MNlR0ZGY3L0MvYmhkL0cwUFdzc3pPU2Z2b0xEZ01kdWowRW0vOUROSnY4WTVFVCt3Szcya1RuM0hXVnlVaG8rQUZxWDdub0Y1UDZwTnBvVWszOFdRNTY2R3dzeithZXY0RERnc2R0amtNay9kTFBKUHdiNWtUK0NyS3ZuLy83QjRRQUFHSzNKTFFyN2pyclJaSmo4c3hqeTFOMVltTWsvZlFXSEFZL2RIb05NL3FHYlRmNHh5Skg4Z1RkTE92QkF2VDFPQjhCeHk3YnZCZm55MFRaNkR5Yi9MSVk4ZFRjV1p2SlBYOEZod0dPM3h5Q1RmK2htazM4TThpVi9VRzZWWHFyMWRqa2RBQUJ0UzNZOGhPclRVdzZhL0xNWTh0VGRXSmpKUDMwR2w3anhBQUFMWGtsRVFWUUZod0dQM1I2RFRQNmhtMDMrTWNpYi9KR3Q1ZmJLOXhycGN6NEFSRkMwNlNwSXVUNU0vbGtNZWVwdUxNemtuNzZDdzRESGJvOUJKdi9RelNiL0dPUk8vcEFrdGV1biszdi83M2x0SXk5Nk4yM0x0cjhxc0c3U0w1cjhzeGp5MU4xWW1Nay9mUVdIQVkvZEhvTk0vcUdiVGY0eHlLSDhnU2RLM1lPL2FyUTNrd01Bb0dWMDNtM0F5eE0rYWZMUFlzaFRkMk5oSnYvMEZSd0dQSFo3RERMNWgyNDIrY2Nnbi9LdkprbXl4cVU3c3dOQXV2NDZtbWhUTnpBS21QeXpHZkxVM1ZpWXlUOTlCWWNCajkwZWcweitvWnROL2pISXAvd0JYVmZxM3IvTnBUK3pBd0NncFhQN1ZrRnZNZmxuTXVTcHU3RXdrMy82Q2c0REhyczlCcG44UXplYi9HT1FVL2tML0wwOE1EaXR2L0V2alV3UEFJQ1dyZjEzQUExL1Q4SVprMy9tWVNiLzlCVWNCangyZXd3eStZZHVOdm5ISUtmeUIyckFTcm1PRWRjOU1qOEFaQzAxYmRKZW9KSjE5cFNZL0RNUE0vbW5yK0F3NExIYlk1REpQM1N6eVQ4RytaVS9pTjViN3Fsc2NWNEVEd2NBUU9uUy9tMktYTzBqKzZpWS9ETVBNL21ucitBdzRMSGJZNURKUDNTenlUOEd1WlkvYnd3ZmF2dXE4eUpIOEhJQUFKUTZkejZDNklPKzhpZGc4czg4ek9TZnZvTERnTWR1ajBFbS85RE5KdjhZNUZuK1VLdWh2UXRXN01uczZicTNBd0NnOVQrbDY0QS8rK3d3K1djZlp2SlBYOEZod0dPM3h5Q1RmK2htazM4TThpMS9RTmJOdVhMd0dlZGx4aWRtR1RZWjFjMExUcVBXOUVkZ2J1YmhKdi9NdzB6KzZTczRESGpzOWhoazhnL2RiUEtQUWU3bHp3dmxjdVU4NlRyeWEvWVo0ZlVKQUVEYmt0My9GR1FGV2YveG12d3pEelA1cDYvZ01PQ3gyMk9ReVQ5MHM4ay9Cdm1YLzJDVHltVlp5eDhDSEFBQXJaMDdONmp3OWN3Q1RmNlpoNW44MDFkd0dQRFk3VEhJNUIrNjJlUWZnL3pMSDBXdWFlc2RlTTExbjhudy9pMkFNVlNSNnBNZGp3bDB1UVpGdytRZkVKTi90Q0NUZitobWszOE1DaUYvN3ByZFUvbWk2ejVISThnVEFIajdidzFzTzlqY0E3elFjSWpKUC9Nd2szLzZDZzRESHJzOUJwbjhRemViL0dOUUFQa2ovSzY5WExuSmNaMVVnaDBBQU5MMTVnR3R5WEtndis0WG0vd3pEelA1cDYvZ01PQ3gyMk9ReVQ5MHM4ay9Ca1dRUCt6UVdtMjVqKy83anlmb0FRQlFXcjd6alFTNUJCaWM5b3RNL3BtSG1melRWM0FZOE5qdE1jamtIN3JaNUIrRFlzai9nQ1N5YkhidjBDNm5oYVpCOEFNQW9LVno1d3VxdWdTbThWN0dKdi9NdzB6KzZTczRESGpzOWhoazhnL2RiUEtQUVRIa1h4UDBpbkwzd08rZEZwb21VUTRBZ05LeS9xY0Y3U1h0UDQzSlAvTXdrMy82Q2c0REhyczlCcG44UXplYi9HTlFEUG1qc0tiY003akJaWjk2aUhZQUFMUjI5ajhxd3MyVGZ0SGtuM21ZeVQ5OUJZY0JqOTBlZzB6K29adE4vakVvaVB4UnVXOTJUK1ZPaDNYcUp1b0JBTkM2ZE5mdEt2cU5DWjgwK1djZVp2SlBYOEZod0dPM3h5Q1RmK2htazM4TWlpSi9lTExjUG5CZHc4czBTUFFEQUtDMHRQOXJLbkliWVBMM0VHYnlUMS9CWWNCanQ4Y2drMy9vWnBOL0RBb2pmL2w1V1N1WFNSZUhHOStvTVlLOUVkQjBxRzdzK0Jib2w2S1VtL3dEWXZLUEZtVHlEOTFzOG85QlllVFBzK1Z5MjBYU3RYdjZ2eFdYSWJsNEFqQkdhK2V1TmNEOXdZdE4vZ0V4K1VjTE12bUhiamI1eDZBNDhuKysyanpyNGxqeWg1d2RBQ0pvYTJmL1ZjRGR3VXBOL2dFeCtVY0xNdm1IYmpiNXg2QkE4ajkwU0M2ZWQvbStnWVlYeW9CY0hRQnc1QzJEbC9WZkw0alh0MEFFVFA1Qk1mbEhDekw1aDI0MitjZWdJUEpYK0UyMWVkYUZjMWNPN0hQWktRdHk5VE1BNzZhNnFlTmFWTmZqWTArVGYwQk0vdEdDVFA2aG0wMytNU2lJL0FXZUtaWGJMbzM1Mkg4OHVYc0NNSjYyemwzZlVWZ05HZjkwcE1rL0lDYi9hRUVtLzlETkp2OFlGRVQrd0tiU1FPV3plWkUvNVB3SndCalZUUXN2UXVWeDREam5NSk4vUUV6KzBZSk0vcUdiVGY0eEtJNzh2MXMrcFhLVlhNQ2hoaGZ5UUNFT0FJQ1JKeForVkJQNU1YQnl3eUVtLzRDWS9LTUZtZnhETjV2OFkxQU0rU3NxdDdiM0RxeDEyY2NYaFRrQUFJWTJ6MS9jZExqcEo4QlpkYi9ZNUI4UWszKzBJSk4vNkdhVGZ3eUtJZjhSVWUwcDl3NCs1clNRUndwMUFBQm8zd2x6UjVwYmZnaGNNdjBYWlRaVVB5Yi9hQ3M0REhqczloaGs4Zy9kYlBLUFFUSGt2ME5VbHBkN0I1NXpXc2d6aFRzQUFGU1IwVTBkYXhUOUpsUDlJS1BKUHlBbS8yaEJKdi9RelNiL0dCUkQvcitsNlhCWCt4WERPNTBXQ2tBaEQ0QXhxazkwZkk1RUh3Rk9tSFRBNUI4UWszKzBJSk4vNkdhVGZ3eUtJZjhIeWlPVmEyVTFCNTBXQ2tTaER3Q0E2c2I1cDBQVEJ1QWpFNzVnOGcrSXlUOWFrTWsvZExQSlB3YjVsLytnSUt2S1BRT1BPaThVa0Z5L0Q4QjBhRnUyNTlYVy9hV3pnZldNL1ZHWi9BTmk4bzhXWlBJUDNXenlqMEgrNWY5OGsvQ3hvc2tmWnNBVGdQR01iRnkwQk9VaGhYbnBreWIvYkRENVJ3c3krWWR1TnZuSElOL3lWMFh2YVM4UDNpaGRqRG92RklFWmRRQUFEUGZOZTEvUzFQd0Q0SUxKSjB6KzJXRHlqeFprOGcvZGJQS1BRWjdsTDd5UnFIYVhlZ1ovN2J4TVJBci9MWUIzVSs3YXU3MzE1ZjRMVWE0SGhpWisxZVNmRFNiL2FFRW0vOUROSnY4WTVGZitOVVR2R1Q3VWVtYlI1UTh6OEFuQWVBNXM2amhWYXZvQThHbVRmMWFZL0tNRm1meERONXY4WTVCVCtTdThwcXFyNXZRTy90SjVrWnd3b3c4QUFGV2t1bkhSQ2tHL0Rjek5OdHhmbU1rL2ZRV0hBWS9kSG9OTS9xR2JUZjR4eUtmOHE2RHJ5dVhCMjRyNnZmNmpNZU1QZ0RHR05zOWYzSHc0dVYyVkw1REZ2N2ZKUDlvS0RnTWV1ejBHbWZ4RE41djhZNUJQK1c5SWt1VEdVdmYrYmM1TDVKQmo1Z0FZWTNSRHg5bEtiYjNDSnhvT01mbEhXOEZod0dPM3h5Q1RmK2htazM4TThpZi92MmtpTjh6dUh2aVo4d0k1WnNiOUVPQlV0Q3pmOVh6THkyK2REN0lhMkZOM2dNay8yZ29PQXg2N1BRYVovRU0zbS94amtDLzV2NG15cWx5dW5EblQ1US9INEJPQThXamZndG1qelZ5aktqY3puWjhQTVBsSFc4Rmh3R08zeHlDVGYraG1rMzhNOGlQLzNTcmMyVjZxckpjdURqaVhGNFJqK2dBWW85TFhzV0JXYyswbWxLdUJ0a21IVFA3UlZuQVk4Tmp0TWNqa0g3clo1QitEZk1oL2p5cDN0SS9PdVZkVzd4aDJMaTRZZGdDTVkzakRpZTlQYVA0SzBBT1Uzdm1DeVQvYUNnNERIcnM5QnBuOFF6ZWIvR01RWC83L0FyMnJQSExjOTQ5RjhZOWhCOEFrVlBvNkZqUTMxYTVKNEZyVnFkNVd1QjVNL3ZXczRERGdzZHRqa01rL2RMUEpQd1pSNWE5L1VwSzcyMDhaK0pGY3dDSG53b0pqQjBBSyt2Q2k5cEZ5YlFYSURjQ3BqbWtwSDAwNUhnaVRmN1FnazMvb1pwTi9ES0xJWDRkUjZSUGhnZktWbFdlZGkyWVFkZ0JNQTExTE1uTG1vazhCcTFCZENzeXFNeUhsb3luSEEySHlqeFprOGcvZGJQS1BRV2o1SzYrbzhQRGhnL0xnM0pVRCs1eExaaUIyQU5USjBPYjVpNXNQTnZVcXVwSnBQUlV3K2RlemdzT0F4MjZQUVNiLzBNMG0veGlFay84MmdiNWFyZmJZN042aHJjN2hNeHc3QUJwRUZUbXdjZUY1aVVvWHFwOUhXRHpKVk1wSGs0Vm10bDRkbVB5akJabjhRemViL0dQZ1hmNzZiMUY1SEpHKzhwVURmM0FPUFlhd0F5QURkQzFKOWNNTHpoZEp1a0F2QlQ1ZzhxOXZCWWNCajkwZWcweitvWnROL2pId0kvK0RDRnRxeWxNa3RhZG1Yekgwb2t2WXNZd2RBQjRZMlRqdmcxcExMZ0krQTN4U29aejZBcE4vb3dNZXV6MEdtZnhETjV2OFk1Q2QvQStEdkFTMUxTQlBsNXBtL1VJdTN6Zmd0cHdCZGdCNFIzOTZXbXQxNkwvbmtzaTVvbnFPSWg4SFR2ci9RSlN0SW5aUFhNRmh3R08zeHlDVGYraG1rMzhNWE9TdjlLdm9pNUE4MjVUSWx0YlJXYy9KaWoyVkxOY3ozc1lPZ0FnTVAzbml5UnhxUGtkVXp3Sk9WK1VNRWM3Z2FPOUNtQ2ttLzJoQkp2L1F6U2IvR0V4Zi9qdUJiUXIvRVBoTFF1MmxneUl2emVrZWZNdnJmc1k3MkFHUUUzUXRTZlZEaTA2UlJFL1htcDRFZEdoQ2g2Z3NCRjJzeXZFaXpFRklSSmtMaU1MeGRiWk0rRWNVVFA2Qk1QbWIvSU14Q0J3RWFzRCtJNS9iSzdCWFlTL0tIcUcydHliczFzUEo2N1BRMTF1b3ZDNjlWSU52YWt6Z2YvY1VIYmM2YmhCbUFBQUFBRWxGVGtTdVFtQ0MiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIiwicHVycG9zZSI6ImFueSBtYXNrYWJsZSJ9XX0=">
+</head>
+<style id="splash-css">
+/* ══════ SPLASH / LOCK SCREEN (โลโก้ + auto-lock) ══════ */
+#appSplash{position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:26px;
+  background:radial-gradient(120% 120% at 50% 20%,#f8a51b 0%,#d97706 70%,#0b1220 100%);
+  opacity:1;transition:opacity .55s ease,visibility .55s ease;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;cursor:pointer;}
+#appSplash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+#appSplash::before{content:"";position:absolute;inset:-50%;
+  background:conic-gradient(from 0deg,transparent 0 70%,rgba(255,255,255,.06) 85%,transparent 100%);
+  animation:sp-rotate 12s linear infinite;}
+#appSplash .sp-grid{position:absolute;inset:0;opacity:.10;
+  background-image:linear-gradient(rgba(255,255,255,.7) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.7) 1px,transparent 1px);
+  background-size:44px 44px;mask:radial-gradient(circle at 50% 40%,#000,transparent 72%);
+  -webkit-mask:radial-gradient(circle at 50% 40%,#000,transparent 72%);}
+.sp-logo-wrap{position:relative;width:min(46vw,190px);aspect-ratio:1;z-index:2;
+  animation:sp-float 4.2s ease-in-out infinite;}
+.sp-logo-wrap::after{content:"";position:absolute;inset:-14%;border-radius:32%;
+  background:linear-gradient(90deg,#fde68a,#f59e0b,#ea580c);filter:blur(26px);opacity:.55;z-index:-1;animation:sp-glow 3.4s ease-in-out infinite;}
+.sp-ring{position:absolute;inset:-9%;border-radius:34%;border:3px solid transparent;
+  border-top-color:#fff2d6;border-right-color:#fff2d6;opacity:.8;animation:sp-rotate 3.6s linear infinite;}
+.splash-logo-svg{width:100%;height:100%;border-radius:28%;
+  box-shadow:0 22px 60px rgba(0,0,0,.5);display:block;}
+.sp-title{z-index:2;color:#fff;font-family:'Sarabun','Prompt',sans-serif;font-weight:800;
+  font-size:clamp(22px,5.4vw,34px);letter-spacing:.3px;text-align:center;margin:0;
+  text-shadow:0 3px 16px rgba(0,0,0,.4);}
+.sp-sub{z-index:2;margin-top:-14px;color:rgba(255,255,255,.82);font-family:'Sarabun',sans-serif;
+  font-size:clamp(12px,3vw,15px);letter-spacing:1.5px;text-transform:uppercase;text-align:center;}
+.sp-accent{z-index:2;width:min(58vw,220px);height:5px;border-radius:3px;background:linear-gradient(90deg,#fde68a,#f59e0b,#ea580c);
+  background-size:200% 100%;animation:sp-shimmer 2.6s linear infinite;box-shadow:0 0 18px rgba(255,255,255,.25);}
+.sp-enter{z-index:2;margin-top:8px;color:#fff;font-family:'Sarabun',sans-serif;font-weight:600;
+  font-size:clamp(13px,3.4vw,16px);display:flex;align-items:center;gap:10px;
+  padding:11px 26px;border-radius:40px;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);animation:sp-pulse 2s ease-in-out infinite;}
+.sp-enter .dot{width:9px;height:9px;border-radius:50%;background:#fff;animation:sp-blink 1.4s infinite;}
+@keyframes sp-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes sp-glow{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.7;transform:scale(1.06)}}
+@keyframes sp-rotate{to{transform:rotate(360deg)}}
+@keyframes sp-shimmer{to{background-position:200% 0}}
+@keyframes sp-pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.05);opacity:1}}
+@keyframes sp-blink{0%,100%{opacity:1}50%{opacity:.25}}
+@media print{#appSplash{display:none !important;}}
+</style>
+</head>
+<body data-theme="light">
+<!-- ══════ SPLASH / LOCK OVERLAY ══════ -->
+<div id="appSplash" role="button" aria-label="แตะเพื่อเข้าใช้งาน" tabindex="0">
+  <div class="sp-grid"></div>
+  <div class="sp-logo-wrap"><div class="sp-ring"></div><svg class="splash-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="pg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#fff7ed"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- sun rays (day) -->
+  <g stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".55">
+    <line x1="256" y1="40" x2="256" y2="74"/>
+    <line x1="150" y1="70" x2="168" y2="100"/>
+    <line x1="362" y1="70" x2="344" y2="100"/>
+  </g>
+  <!-- document -->
+  <rect x="150" y="118" width="212" height="286" rx="26" fill="url(#pg)"/>
+  <rect x="150" y="118" width="212" height="52" rx="26" fill="#f97316"/>
+  <rect x="150" y="150" width="212" height="20" fill="#f97316"/>
+  <text x="256" y="156" font-family="Arial,Segoe UI,sans-serif" font-size="30" font-weight="800" fill="#fff" text-anchor="middle">DAILY</text>
+  <!-- bar chart -->
+  <rect x="184" y="300" width="34" height="64" rx="8" fill="#f59e0b"/>
+  <rect x="239" y="262" width="34" height="102" rx="8" fill="#f97316"/>
+  <rect x="294" y="224" width="34" height="140" rx="8" fill="#ea580c"/>
+  <!-- trend arrow -->
+  <path d="M184 286 l55 -34 l55 -30 l40 -22" fill="none" stroke="#16a34a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 170 l10 28 l-30 4 z" fill="#16a34a"/>
+</svg></div>
+  <h1 class="sp-title">รายงานประจำวัน</h1>
+  <div class="sp-sub">Daily Personality Report · SBK</div>
+  <div class="sp-accent"></div>
+  <div class="sp-enter"><span class="dot"></span> แตะเพื่อเข้าใช้งาน</div>
+</div>
+
+<div class="bg-particles" id="particles"></div>
+<div class="bg-dots"></div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
+<div class="notification" id="notification">
+    <span id="notificationText"></span>
+</div>
+
+<div id="reportContainer">
+    <div class="header">
+        <div class="header-left">
+            <div class="header-title">🏆 PERSONALITY DAILY TEST REPORT</div>
+            <div class="header-sub">รายงานผลการตรวจ Personality ประจำวัน</div>
+        </div>
+        <div class="btn-group no-print">
+            <button class="btn btn-theme"  onclick="toggleTheme()">🌓 มืด/สว่าง</button>
+            <input  type="file" id="fileIn" style="display:none" onchange="handleExcel(event)">
+            <button class="btn btn-import" onclick="document.getElementById('fileIn').click()">📂 นำเข้า Excel</button>
+            <button class="btn btn-import" style="background:#10b981" onclick="loadFromSheets(true)">🔄 ดึงจาก Google Sheets</button>
+            <label style="display:inline-flex;align-items:center;gap:4px;font-size:.7rem;margin-left:6px;cursor:pointer">
+                <input type="checkbox" id="autoRefreshChk" onchange="toggleAutoRefresh(this.checked)"> auto 30s
+            </label>
+            <span id="liveDot" style="display:none;font-size:.68rem;color:#10b981;margin-left:4px">● live</span>
+            <button class="btn btn-reset"  onclick="resetData()">🔄 รีเซ็ต</button>
+            <button class="btn btn-jpeg"   onclick="downloadJPG()">📸 บันทึก JPEG</button>
+            <button class="btn btn-print"  onclick="exportPDF()">🖨️ พิมพ์/PDF</button>
+        </div>
+    </div>
+
+    <div class="filter-row">
+        <div class="filter-item">
+            <span class="filter-icon">📅</span>
+            <span class="filter-label">วันที่ตรวจ:</span>
+            <input type="date" id="dateInput" class="date-input" onchange="onDateChange(this.value)">
+            <span id="dateDisplay" class="date-badge">--/--/----</span>
+        </div>
+        <div class="filter-item">
+            <span class="filter-icon">⏰</span>
+            <span class="filter-label">กะงาน:</span>
+            <select id="shiftFilter" class="shift-select" onchange="onShiftChange(this.value)">
+                <option value="ทั้งหมด">ทั้งหมด</option>
+                <option value="กะกลางวัน">🌞 กะกลางวัน</option>
+                <option value="กะกลางคืน">🌙 กะกลางคืน</option>
+                <option value="กะดึก">🌃 กะดึก</option>
+                <option value="กะเช้า">🌅 กะเช้า</option>
+                <option value="กะบ่าย">☀️ กะบ่าย</option>
+            </select>
+            <span id="shiftBadge" class="shift-badge" style="display:none"></span>
+        </div>
+        <div class="filter-item" id="filterModeToggle" style="display:none">
+            <label class="toggle-label">
+                <input type="checkbox" id="filterModeCheck" onchange="toggleFilterMode(this.checked)">
+                <span class="toggle-text">กรองข้อมูลตามกะ</span>
+            </label>
+        </div>
+        <div class="filter-item filter-summary" id="filterSummary" style="display:none">
+            <span id="filterSummaryText"></span>
+        </div>
+    </div>
+
+    <div class="dashboard-row">
+        <div class="stats-grid">
+            <div class="card">
+                <div class="card-label">📊 รวมทั้งหมด</div>
+                <div class="card-value" id="statTotal">0</div>
+            </div>
+            <div class="card success">
+                <div class="card-label">✅ ผ่านเกณฑ์</div>
+                <div class="card-value" id="statPass">0</div>
+            </div>
+            <div class="card danger">
+                <div class="card-label">❌ ไม่ผ่านเกณฑ์</div>
+                <div class="card-value" id="statFail">0</div>
+            </div>
+            <div class="card warning">
+                <div class="card-label">⭐ คะแนนเฉลี่ย</div>
+                <div class="card-value" id="statAvg">0.0</div>
+            </div>
+        </div>
+        <div class="chart-card">
+            <div class="chart-wrapper">
+                <canvas id="personalityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-box">
+        <table id="mainTable">
+            <thead>
+                <tr>
+                    <th class="col-id">รหัส</th>
+                    <th class="col-name">ชื่อ-นามสกุล</th>
+                    <th class="col-score">คะแนน</th>
+                    <th class="col-pass">หัวข้อที่ผ่าน</th>
+                    <th class="col-fail">หัวข้อที่ไม่ผ่าน</th>
+                    <th class="col-note">หมายเหตุ</th>
+                    <th class="col-status">สถานะ</th>
+                </tr>
+            </thead>
+            <tbody id="tBody">
+                <tr><td colspan="7" style="text-align:center; padding:40px; color:#999; font-size: 14px;">⏳ รอนำเข้าข้อมูล...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    /*==========================================================
+     *  PERSONALITY DAILY TEST REPORT — Script v3.0
+     *  ✅ รักษาฟังก์ชันเดิมทุกอย่างครบถ้วน
+     *  ✅ แก้ไขและเสริมความแข็งแกร่งของ Excel Import
+     *==========================================================*/
+
+    let myChart;
+    let rawData       = [];   // ข้อมูลดิบทั้งหมดจาก Excel
+    let detectedCols  = {};   // cache column mapping หลังนำเข้า
+
+    /* ─────────────────────────────────────────────
+       SECTION 1 — PARTICLES & INIT (คงเดิมทุกบรรทัด)
+    ───────────────────────────────────────────── */
+    function createParticles() {
+        const container = document.getElementById('particles');
+        if (!container) return;   // ไม่มี container ก็ข้าม ไม่ให้ init ทั้งชุดพัง
+        const particleCount = 15;
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const size     = Math.random() * 40 + 20;
+            const left     = Math.random() * 100;
+            const duration = Math.random() * 15 + 10;
+            const delay    = Math.random() * 5;
+            particle.style.cssText = `width:${size}px;height:${size}px;left:${left}%;animation-duration:${duration}s;animation-delay:${delay}s`;
+            container.appendChild(particle);
+        }
+    }
+
+    window.onload = function () {
+        try {
+            createParticles();
+            // ตั้งค่าเริ่มต้นของตัวเลขการ์ด (ใช้เป็น start ของ animation รอบแรก)
+            ['statTotal','statPass','statFail','statAvg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.dataset.value = '0';
+            });
+            // ตั้งวันที่เริ่มต้นเป็นวันนี้
+            const today = new Date();
+            const yyyy  = today.getFullYear();
+            const mm    = String(today.getMonth()+1).padStart(2,'0');
+            const dd    = String(today.getDate()).padStart(2,'0');
+            const isoToday = `${yyyy}-${mm}-${dd}`;
+            const dateEl = document.getElementById('dateInput');
+            if (dateEl) { dateEl.value = isoToday; onDateChange(isoToday); }
+            initChart(0, 0);
+            // โหลดข้อมูลจาก Google Sheets อัตโนมัติทันทีที่เปิด (เงียบ ๆ ถ้าพลาด)
+            setTimeout(() => loadFromSheets(true, true), 300);
+        } catch (err) {
+            console.error('❌ เริ่มต้นระบบไม่สำเร็จ:', err);
+            showNotification('⚠️ เริ่มต้นบางส่วนไม่สำเร็จ — ลองรีเฟรชหน้า', 'error');
+        }
+    };
+
+    /* แปลงวันที่ค.ศ. → พ.ศ. แสดงใน badge */
+    function onDateChange(val, skipRender) {
+        const disp = document.getElementById('dateDisplay');
+        if (!val) { disp.textContent = '--/--/----'; }
+        else {
+            const [y, m, d] = val.split('-');
+            disp.textContent = `${d}/${m}/${parseInt(y) + 543}`;
+        }
+        if (!skipRender && typeof allRows !== 'undefined' && allRows.length > 0) {
+            applyDateAndRender();
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 2 — UI HELPERS (คงเดิมทุกบรรทัด)
+    ───────────────────────────────────────────── */
+    function showNotification(message, type = 'success') {
+        const notification     = document.getElementById('notification');
+        const notificationText = document.getElementById('notificationText');
+        notificationText.innerText = message;
+        notification.className = 'notification ' + type + ' show';
+        setTimeout(() => notification.classList.remove('show'), 4000);
+    }
+
+    function showLoading() { document.getElementById('loadingOverlay').classList.add('active'); }
+    function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+
+    function toggleTheme() {
+        const body    = document.body;
+        const current = body.getAttribute('data-theme') || 'light';
+        const next    = current === 'light' ? 'dark' : 'light';
+        body.setAttribute('data-theme', next);
+        // กรอบกราฟ/วงโดนัทเป็นสีทึบสดใสคงที่ทุกโหมด → ป้าย % ใช้สีขาวเสมอ
+        // (ไม่สลับตามธีมอีกต่อไป เพื่อให้คอนทราสต์คงที่บนพื้นฟ้าทึบ)
+        if (myChart) {
+            myChart.options.plugins.datalabels.color = '#ffffff';
+            myChart.update('none');
+        }
+        showNotification(next === 'dark' ? '🌙 เปลี่ยนเป็นโหมดมืด' : '☀️ เปลี่ยนเป็นโหมดสว่าง', 'success');
+    }
+
+    function resetData() {
+        if (!confirm('⚠️ คุณต้องการเริ่มรอบใหม่ใช่หรือไม่?')) return;
+        showLoading();
+        setTimeout(() => {
+            rawData      = [];
+            detectedCols = {};
+            // reset shift UI
+            document.getElementById('shiftFilter').value = 'ทั้งหมด';
+            document.getElementById('shiftBadge').style.display = 'none';
+            document.getElementById('filterModeCheck').checked = false;
+            document.getElementById('filterModeToggle').style.display = 'none';
+            document.getElementById('filterSummary').style.display = 'none';
+            shiftFilterMode = false;
+            document.getElementById('tBody').innerHTML =
+                '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;font-size:14px;">⏳ รอนำเข้าข้อมูล...</td></tr>';
+            updateStats([]);
+            hideLoading();
+            showNotification('✅ ล้างข้อมูลเรียบร้อย', 'success');
+        }, 500);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 3 — KEY NORMALIZER & getVal
+       รองรับ: trim, Unicode WS, case-insensitive,
+               exact → partial fallback
+    ───────────────────────────────────────────── */
+    function normalizeKey(k) {
+        return String(k)
+            .replace(/[\u00A0\u200B\u200C\u200D\uFEFF\t\r\n]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    /**
+     * getVal — ค้นหาค่าจาก row โดย key ที่กำหนด
+     * Pass-1 : exact match (หลัง normalize)
+     * Pass-2 : partial/includes match (fallback)
+     * Return : ค่าที่พบ หรือ '' ถ้าไม่พบ
+     */
+    function getVal(row, keys) {
+        if (!row || typeof row !== 'object') return '';
+        const rowKeys  = Object.keys(row);
+        const normKeys = keys.map(normalizeKey);
+
+        // Pass 1 — exact match โดยไล่ตามลำดับ "คำขอ" (key แรกในลิสต์มีสิทธิ์ก่อน)
+        for (const nk of normKeys) {
+            const hit = rowKeys.find(rk => normalizeKey(rk) === nk);
+            if (hit !== undefined && String(row[hit]).trim() !== '') return row[hit];
+        }
+        // เผื่อ exact ตรงแต่ค่าว่าง → ยังคืนค่าว่างนั้น (ถือว่าพบคอลัมน์)
+        for (const nk of normKeys) {
+            const hit = rowKeys.find(rk => normalizeKey(rk) === nk);
+            if (hit !== undefined) return row[hit];
+        }
+
+        // Pass 2 — partial match แบบมีลำดับ: ไล่ตามคำขอ แล้วหา row key ที่ "ครอบ" คำขอนั้น
+        // ป้องกัน key สั้นจับผิด เช่น 'ชื่อ' ไม่ควร match 'รายชื่อกลุ่ม' แบบสุ่ม
+        for (const nk of normKeys) {
+            if (nk.length < 2) continue;
+            const hit = rowKeys.find(rk => {
+                const rn = normalizeKey(rk);
+                return rn.length >= 2 && (rn.includes(nk) || nk.includes(rn));
+            });
+            if (hit !== undefined) return row[hit];
+        }
+        return '';
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 4 — SCORE NORMALIZER
+       แปลงค่า score ที่อาจมาจาก Excel เป็นตัวเลขที่ใช้งานได้
+    ───────────────────────────────────────────── */
+    function normalizeScore(val) {
+        if (val === null || val === undefined || val === '') return 0;
+        // Date object (เกิดเมื่อ cellDates:true ถูกเปิดโดยไม่ตั้งใจ)
+        if (val instanceof Date) return 0;
+        if (typeof val === 'object') return 0;
+        const n = parseFloat(String(val).replace(/,/g, ''));
+        return isNaN(n) ? 0 : n;
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 5 — STATUS NORMALIZER
+       รองรับภาษาไทย/อังกฤษ + Unicode whitespace
+    ───────────────────────────────────────────── */
+    function normalizeStatus(val) {
+        return String(val || '')
+            .replace(/[\u00A0\u200B\u200C\u200D\uFEFF\t\r\n]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function isPassStatus(status) {
+        const s = normalizeStatus(status).toLowerCase();
+        return s === 'ผ่านเกณฑ์' || s === 'pass' || s === 'ผ่าน';
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 6 — EXCEL IMPORT (ปรับปรุงครบถ้วน)
+    ───────────────────────────────────────────── */
+    function handleExcel(e) {
+        const file = e.target.files[0];
+        e.target.value = '';                 // reset → อัปโหลดไฟล์เดิมซ้ำได้
+        if (!file) return;
+
+        // ตรวจนามสกุล
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!['xlsx', 'xls', 'csv', 'ods'].includes(ext)) {
+            showNotification('❌ รองรับเฉพาะ .xlsx .xls .csv .ods เท่านั้น', 'error');
+            return;
+        }
+
+        // ตรวจขนาดไฟล์ (สูงสุด 20 MB)
+        if (file.size > 20 * 1024 * 1024) {
+            showNotification('❌ ไฟล์ใหญ่เกิน 20 MB กรุณาลดขนาดก่อน', 'error');
+            return;
+        }
+
+        showLoading();
+
+        const reader = new FileReader();
+        reader.onerror = () => {
+            hideLoading();
+            showNotification('❌ ไม่สามารถอ่านไฟล์ได้ กรุณาลองใหม่', 'error');
+        };
+
+        reader.onload = (evt) => {
+            setTimeout(() => {
+                try {
+                    const bytes    = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(bytes, {
+                        type      : 'array',
+                        cellDates : false,   // ปิด: ป้องกัน score/ID กลายเป็น Date
+                        raw       : false,   // เปิด: ให้ SheetJS format ตัวเลขเป็น string
+                        codepage  : 874      // Windows-874 (Thai) fallback
+                    });
+
+                    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+                        hideLoading();
+                        showNotification('❌ ไฟล์นี้ไม่มีชีตข้อมูล (sheet) ที่อ่านได้', 'error');
+                        return;
+                    }
+
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet     = workbook.Sheets[sheetName];
+
+                    if (!sheet) {
+                        hideLoading();
+                        showNotification(`❌ เปิดชีต "${sheetName}" ไม่ได้ — ไฟล์อาจเสียหาย`, 'error');
+                        return;
+                    }
+
+                    // อ่านข้อมูลดิบ: defval:'' ป้องกัน cell ว่างทำให้ key หาย
+                    const parsed = XLSX.utils.sheet_to_json(sheet, {
+                        defval  : '',
+                        raw     : false,
+                        blankrows: false      // ข้ามแถวว่างทั้งหมด
+                    });
+
+                    // กรองแถวที่ทุก value เป็น '' ออก (แถวว่างแบบ partial)
+                    rawData = parsed.filter(row =>
+                        Object.values(row).some(v => String(v).trim() !== '')
+                    );
+
+                    // ─── Diagnostic (เห็นใน Browser Console) ───
+                    if (rawData.length > 0) {
+                        const cols = Object.keys(rawData[0]);
+                        console.group('📊 Personality Report — Excel Import OK');
+                        console.log('📋 Sheet   :', sheetName);
+                        console.log('📋 Columns :', cols);
+                        console.log('📋 Rows    :', rawData.length);
+                        console.log('📄 Row[0]  :', rawData[0]);
+                        console.groupEnd();
+
+                        // แจ้งเตือนถ้าหา column หลักไม่พบ
+                        const warnCols = [];
+                        if (!cols.some(c => ['รหัส','รหัสพนักงาน','ID'].map(normalizeKey).includes(normalizeKey(c)))) warnCols.push('รหัส');
+                        if (!cols.some(c => ['ชื่อ','ชื่อ-นามสกุล','Name'].map(normalizeKey).includes(normalizeKey(c)))) warnCols.push('ชื่อ');
+                        if (!cols.some(c => ['สถานะ','Status'].map(normalizeKey).includes(normalizeKey(c)))) warnCols.push('สถานะ');
+                        if (warnCols.length > 0) {
+                            console.warn('⚠️ ไม่พบ column:', warnCols.join(', '), '— ตรวจสอบชื่อ header ใน Excel');
+                            showNotification(`⚠️ นำเข้าสำเร็จ แต่ไม่พบ column: ${warnCols.join(', ')}`, 'error');
+                        } else {
+                            showNotification(`✅ นำเข้าสำเร็จ ${rawData.length} รายการ (ชีท: ${sheetName})`, 'success');
+                        }
+
+                        // แสดง toggle กรองกะ เมื่อมีข้อมูลแล้ว
+                        const hasShiftCol = cols.some(c =>
+                            ['กะ','กะงาน','shift','กะการทำงาน'].map(normalizeKey).includes(normalizeKey(c))
+                        );
+                        document.getElementById('filterModeToggle').style.display = hasShiftCol ? 'flex' : 'none';
+                    } else {
+                        console.warn('⚠️ ไม่พบข้อมูลในชีท:', sheetName);
+                        showNotification(`⚠️ ไฟล์ว่าง ไม่พบข้อมูลในชีท: ${sheetName}`, 'error');
+                    }
+
+                    filterData();
+                    hideLoading();
+
+                } catch (err) {
+                    hideLoading();
+                    console.error('❌ Excel import error:', err);
+                    showNotification('❌ นำเข้าไม่สำเร็จ: ' + err.message, 'error');
+                }
+            }, 500);
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SECTION 7 — SHIFT CONTROL + FILTER
+       ─────────────────────────────────────────────────────────────
+       กะงานทำงาน 2 mode แยกกันชัดเจน:
+
+       MODE A (default) — Label Mode:
+         เลือกกะ = เปลี่ยน label บนรายงาน/export เท่านั้น
+         ข้อมูลทั้งหมดแสดงครบ ไม่มีการกรอง
+         เหมาะสำหรับ: กรอกข้อมูลกะใดกะหนึ่งแล้วต้องการระบุว่าเป็นกะอะไร
+
+       MODE B — Filter Mode (เปิดด้วย checkbox):
+         กรองข้อมูลจาก column กะ/กะงาน/Shift ใน Excel
+         เหมาะสำหรับ: นำเข้า Excel ที่มีข้อมูลหลายกะรวมกัน
+    ═══════════════════════════════════════════════════════════════ */
+
+    let shiftFilterMode = false;   // false = label-only, true = filter-from-data
+
+    /* เรียกเมื่อเปลี่ยนกะจาก dropdown */
+    function onShiftChange(val) {
+        // อัปเดต badge label เสมอ
+        const badge = document.getElementById('shiftBadge');
+        if (val === 'ทั้งหมด') {
+            badge.style.display = 'none';
+        } else {
+            badge.textContent = val;
+            badge.style.display = 'inline-block';
+        }
+
+        // ถ้า filter mode เปิดอยู่ → กรองข้อมูลด้วย
+        if (shiftFilterMode) {
+            filterData();
+        } else {
+            // label mode → แสดงข้อมูลทั้งหมด อัปเดต summary
+            renderTable(rawData);
+            updateStats(rawData);
+            updateSummary(rawData.length, rawData.length, val);
+        }
+    }
+
+    /* toggle filter mode จาก checkbox */
+    function toggleFilterMode(checked) {
+        shiftFilterMode = checked;
+        const sel = document.getElementById('shiftFilter');
+        if (checked) {
+            // เปิด filter mode → กรองทันที
+            filterData();
+            showNotification('🔍 เปิดโหมดกรองข้อมูลตามกะ', 'success');
+        } else {
+            // ปิด filter mode → คืนข้อมูลทั้งหมด
+            renderTable(rawData);
+            updateStats(rawData);
+            updateSummary(rawData.length, rawData.length, sel.value);
+            showNotification('🏷️ โหมด Label — แสดงข้อมูลทั้งหมด', 'success');
+        }
+    }
+
+    /* อัปเดต summary text */
+    function updateSummary(shown, total, shift) {
+        const el = document.getElementById('filterSummary');
+        const tx = document.getElementById('filterSummaryText');
+        if (shiftFilterMode && shift !== 'ทั้งหมด') {
+            tx.textContent = `แสดง ${shown} จาก ${total} รายการ`;
+            el.style.display = 'flex';
+        } else {
+            el.style.display = 'none';
+        }
+    }
+
+    function filterData() {
+        const selectedShift = document.getElementById('shiftFilter').value;
+
+        // ถ้าไม่ได้อยู่ใน filter mode → แสดงทุกอย่าง
+        if (!shiftFilterMode || selectedShift === 'ทั้งหมด') {
+            renderTable(rawData);
+            updateStats(rawData);
+            updateSummary(rawData.length, rawData.length, selectedShift);
+            return;
+        }
+
+        // filter mode: กรองจาก column กะใน Excel
+        const shiftKeywords = {
+            'กะกลางวัน' : ['กลางวัน', 'day', 'morning', 'เช้า-บ่าย'],
+            'กะกลางคืน': ['กลางคืน', 'night', 'evening'],
+            'กะดึก'     : ['ดึก', 'midnight', 'late'],
+            'กะเช้า'    : ['เช้า', 'morning', 'am'],
+            'กะบ่าย'    : ['บ่าย', 'afternoon', 'pm'],
+        };
+        const keywords = shiftKeywords[selectedShift] || [selectedShift.replace('กะ', '')];
+
+        /* matchKeyword: คำไทย→ใช้ substring, คำอังกฤษ(ASCII)→ใช้ขอบคำ
+           เพื่อกัน 'day' แมตช์ "Monday", 'am' แมตช์ "team"/"exam", 'pm' แมตช์ "9pm"ฯ */
+        const isAsciiWord = s => /^[a-z0-9]+$/i.test(s);
+        const matchKeyword = (haystack, kw) => {
+            const k = kw.toLowerCase();
+            if (!k) return false;
+            if (isAsciiWord(k)) {
+                // ขอบคำ: ด้านหน้า/หลังต้องไม่ใช่ตัวอักษร-ตัวเลข
+                const re = new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z0-9]|$)', 'i');
+                return re.test(haystack);
+            }
+            return haystack.includes(k);   // คำไทย
+        };
+
+        const filtered = rawData.filter(row => {
+            const val = normalizeStatus(getVal(row, ['กะ','กะงาน','Shift','กะการทำงาน'])).toLowerCase();
+            return keywords.some(kw => matchKeyword(val, kw));
+        });
+
+        // แจ้งเตือนถ้าไม่พบ (แต่ไม่รีเซ็ต select)
+        if (rawData.length > 0 && filtered.length === 0) {
+            showNotification(`⚠️ ไม่พบข้อมูล "${selectedShift}" ใน Excel — ลองปิดโหมดกรอง`, 'error');
+        }
+
+        updateSummary(filtered.length, rawData.length, selectedShift);
+        renderTable(filtered);
+        updateStats(filtered);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 8 — RENDER TABLE (คงเดิม + แก้ XSS + score)
+    ───────────────────────────────────────────── */
+    // ป้องกัน XSS เมื่อใส่ข้อมูลลงใน innerHTML
+    function esc(v) {
+        return String(v)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('tBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:#999;font-size:14px;">🔍 ไม่พบข้อมูล...</td></tr>';
+            return;
+        }
+
+        data.forEach((row, index) => {
+            const status     = normalizeStatus(getVal(row, ['สถานะ', 'Status']));
+            const isPass     = isPassStatus(status);
+            const empId      = esc(getVal(row, ['รหัส', 'รหัสพนักงาน', 'ID']) || '-');
+            const empName    = esc(getVal(row, ['ชื่อ', 'ชื่อ-นามสกุล', 'Name']) || '');
+            const scoreRaw   = getVal(row, ['คะแนน', 'Score']);
+            // ว่าง → "-" | เป็นตัวเลข → แสดงตัวเลข (ตัด .0 ส่วนเกินออก) | ข้อความอื่น → คงข้อความเดิม
+            let scoreDisp;
+            const scoreStr = String(scoreRaw).trim();
+            if (scoreStr === '') {
+                scoreDisp = '-';
+            } else if (/^-?[\d,]+(\.\d+)?$/.test(scoreStr)) {
+                const n = normalizeScore(scoreRaw);
+                scoreDisp = Number.isInteger(n) ? String(n) : String(n);
+            } else {
+                scoreDisp = scoreStr;   // เช่น "N/A", "รอตรวจ"
+            }
+            scoreDisp = esc(scoreDisp);
+            const passItem   = esc(getVal(row, ['หัวข้อที่ผ่าน', 'Pass Item']) || '-');
+            const failDetail = normalizeStatus(getVal(row, ['หัวข้อที่ไม่ผ่าน', 'Fail']) || '-');
+            const failDisp   = esc(failDetail);
+            const note       = esc(getVal(row, ['หมายเหตุ', 'Note']) || '-');
+            const isFail     = failDetail !== '-' && failDetail !== '';
+
+            const tr = document.createElement('tr');
+            tr.style.animationDelay = (index * 0.05) + 's';
+            tr.innerHTML = `
+                <td style="font-weight:600">${empId}</td>
+                <td style="font-weight:700">${empName}</td>
+                <td style="text-align:center;font-weight:800;font-size:14px">${scoreDisp}</td>
+                <td style="color:var(--success);font-weight:600">${passItem}</td>
+                <td class="${isFail ? 'text-fail-detail' : ''}">${failDisp}</td>
+                <td style="color:#6b7280">${note}</td>
+                <td style="text-align:center"><span class="badge ${isPass ? 'bg-pass' : 'bg-fail'}">${esc(status) || 'ไม่ระบุ'}</span></td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 9 — ANIMATE VALUE (แก้ timer รั่ว + ค่าเริ่มแม่นยำ)
+       เหตุผลที่ต้องรื้อ:
+         • เดิมถ้า start === end → increment = 0 → เงื่อนไขหยุดไม่เคยจริง
+           → setInterval วิ่งตลอดไป และสะสมทุกครั้งที่อัปเดต (memory/CPU leak)
+         • เดิมเรียกซ้ำเร็ว ๆ จะมีหลาย timer เขียนทับ element เดียวกัน → เลขกระพริบ/เพี้ยน
+       วิธีแก้:
+         • เก็บ timer ไว้กับตัว element แล้วล้างก่อนเริ่มรอบใหม่เสมอ
+         • ใช้ requestAnimationFrame อิงเวลาจริง → จบตรงเวลาแน่นอน ไม่ค้าง
+         • เก็บค่าตัวเลขล่าสุดไว้ที่ element.dataset.value เพื่อใช้เป็น start รอบถัดไป
+           (แม่นกว่าการ parse ข้อความที่อาจอยู่ระหว่างแอนิเมชัน)
+    ───────────────────────────────────────────── */
+    function animateValue(element, start, end, duration) {
+        if (!element) return;
+        const isAvg = element.id === 'statAvg';
+
+        // sanitize: กันค่า NaN/Infinity ที่อาจหลุดเข้ามา
+        start = Number.isFinite(start) ? start : 0;
+        end   = Number.isFinite(end)   ? end   : 0;
+
+        // ยกเลิก animation เดิมของ element นี้ก่อนเสมอ (กัน timer ซ้อน)
+        if (element._animRAF) { cancelAnimationFrame(element._animRAF); element._animRAF = null; }
+
+        const fmt = v => isAvg ? v.toFixed(1) : String(Math.round(v));
+
+        // กรณีไม่มีการเปลี่ยนแปลง (รวม start===end) → เซ็ตค่าทันที ไม่สร้าง loop
+        if (start === end || !(duration > 0)) {
+            element.textContent  = fmt(end);
+            element.dataset.value = String(end);
+            return;
+        }
+
+        const t0    = performance.now();
+        const delta = end - start;
+        const step = (now) => {
+            const p = Math.min((now - t0) / duration, 1);   // 0..1
+            // easeOutCubic ให้ลื่นและการันตีถึงปลายทาง
+            const eased   = 1 - Math.pow(1 - p, 3);
+            const current = start + delta * eased;
+            element.textContent = fmt(current);
+            if (p < 1) {
+                element._animRAF = requestAnimationFrame(step);
+            } else {
+                element.textContent  = fmt(end);     // ปักหมุดค่าสุดท้ายให้ตรงเป๊ะ
+                element.dataset.value = String(end);
+                element._animRAF = null;
+            }
+        };
+        element._animRAF = requestAnimationFrame(step);
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 10 — UPDATE STATS (คงเดิม + normalizeScore)
+    ───────────────────────────────────────────── */
+    function updateStats(data) {
+        // กันกรณีถูกเรียกด้วยค่าที่ไม่ใช่ array (เช่น undefined) → ถือเป็นว่าง
+        const rows  = Array.isArray(data) ? data : [];
+        const total = rows.length;
+        const pass  = rows.filter(r => r && isPassStatus(getVal(r, ['สถานะ', 'Status']))).length;
+        const fail  = total - pass;
+        const avg   = total > 0
+            ? rows.reduce((s, r) => s + normalizeScore(getVal(r, ['คะแนน', 'Score'])), 0) / total
+            : 0;
+
+        // ใช้ค่าตัวเลขที่เก็บไว้ (dataset.value) เป็นจุดเริ่ม แทนการอ่านข้อความที่อาจกำลังวิ่ง
+        const startOf = id => { const el = document.getElementById(id); return el ? (Number(el.dataset.value) || 0) : 0; };
+
+        animateValue(document.getElementById('statTotal'), startOf('statTotal'), total, 800);
+        animateValue(document.getElementById('statPass'),  startOf('statPass'),  pass,  800);
+        animateValue(document.getElementById('statFail'),  startOf('statFail'),  fail,  800);
+        animateValue(document.getElementById('statAvg'),   startOf('statAvg'),   avg,   800);
+
+        if (myChart) {
+            myChart.data.datasets[0].data = [pass, fail];
+            myChart.update('active');
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       SECTION 11 — CHART (คงเดิมทุกบรรทัด)
+    ───────────────────────────────────────────── */
+    /* ปลั๊กอินวาดวงจาง + ข้อความเมื่อยังไม่มีข้อมูล (sum = 0)
+       เดิม: ถ้า pass=0 fail=0 โดนัทจะว่างเปล่าดูเหมือนกราฟพัง
+       ใหม่: วาดวงสีจาง 1 วง + ข้อความ "ไม่มีข้อมูล" ตรงกลาง */
+    const emptyDoughnutPlugin = {
+        id: 'emptyDoughnut',
+        afterDraw(chart) {
+            const ds  = chart.data.datasets[0];
+            const sum = (ds && Array.isArray(ds.data)) ? ds.data.reduce((a, b) => a + (Number(b) || 0), 0) : 0;
+            if (sum > 0) return;
+
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return;
+            const cx = (chartArea.left + chartArea.right) / 2;
+            const cy = (chartArea.top + chartArea.bottom) / 2;
+            const r  = Math.min(chartArea.right - chartArea.left, chartArea.bottom - chartArea.top) / 2;
+            const outer = r * 0.93, inner = r * 0.62;
+
+            ctx.save();
+            // วงแหวนสีขาวโปร่งบนกรอบฟ้า
+            ctx.beginPath();
+            ctx.arc(cx, cy, outer, 0, Math.PI * 2);
+            ctx.arc(cx, cy, inner, 0, Math.PI * 2, true);
+            ctx.fillStyle = 'rgba(255,255,255,0.18)';
+            ctx.fill('evenodd');
+            // ข้อความกลางวง
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.font = '600 12px Sarabun, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('ไม่มีข้อมูล', cx, cy);
+            ctx.restore();
+        }
+    };
+
+    function initChart(p, f) {
+        // register ครั้งเดียว ปลอดภัยแม้เรียกซ้ำ (Chart.js กันซ้ำให้ผ่าน id)
+        Chart.register(ChartDataLabels, emptyDoughnutPlugin);
+
+        const canvas = document.getElementById('personalityChart');
+        if (!canvas) { console.error('ไม่พบ canvas กราฟ'); return; }
+        const ctx = canvas.getContext('2d');
+
+        // กัน instance ซ้อน: ถ้ามีอยู่แล้วทำลายก่อนสร้างใหม่
+        if (myChart) { try { myChart.destroy(); } catch (_) {} myChart = null; }
+
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels  : ['ผ่านเกณฑ์', 'ไม่ผ่านเกณฑ์'],
+                datasets: [{
+                    data           : [p, f],
+                    backgroundColor: ['#10b981', '#ef4444'],   /* สีทึบสดใส 100% */
+                    borderColor    : 'transparent',            /* ไม่มีขอบขาวอีกต่อไป */
+                    borderWidth    : 2,                        /* ช่องว่างบาง ๆ โปร่ง */
+                    borderRadius   : 4,
+                    hoverOffset    : 6
+                }]
+            },
+            options: {
+                cutout              : '62%',
+                radius              : '93%',   /* เต็มขึ้นแต่ยังเผื่อขอบกรอบฟ้า */
+                responsive          : true,
+                maintainAspectRatio : false,   /* ✅ เติมเต็ม wrapper 160×160 ไม่ล้น */
+                animation: {
+                    animateRotate: true,
+                    animateScale : true,
+                    duration     : 1500,
+                    easing       : 'easeInOutQuart'
+                },
+                layout: { padding: 8 },        /* ✅ กันชนไม่ให้ datalabels/วงถูกตัด */
+                plugins: {
+                    legend : { display: false },
+                    tooltip: {
+                        enabled        : true,
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        padding        : 12,
+                        cornerRadius   : 8,
+                        titleFont      : { size: 14, weight: 'bold' },
+                        bodyFont       : { size: 12 }
+                    },
+                    datalabels: {
+                        color    : '#ffffff',   /* กรอบกราฟเป็นสีฟ้าทึบทุกโหมด → ใช้ขาวเสมอ */
+                        font     : { weight: 'bold', size: 11 },
+                        formatter: (value, ctx) => {
+                            const sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            if (sum === 0 || value === 0) return '';
+                            return (value * 100 / sum).toFixed(0) + '%';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SECTION 12 — SHARED CAPTURE ENGINE  v4.0
+       ✅ แสดง filter-row (วันที่ + กะงาน) ทุกครั้ง
+       ✅ ปิด animation fill-mode:both ทุกตัว → opacity=1 เสมอ
+       ✅ copy canvas chart bitmap ลง clone
+       ✅ ย่อ container ใน onclone ให้ได้ขนาด A4-width ก่อน capture
+    ═══════════════════════════════════════════════════════════════ */
+
+    /* A4 @ 96dpi = 794 × 1123 CSS px  (portrait, no margin) */
+    const A4_W_PX = 794;
+    const A4_H_PX = 1123;
+
+    /**
+     * captureReport(opts, callback)
+     * opts.forPDF  = true  → บีบ layout เป็น A4 ก่อน capture
+     * opts.forPDF  = false → capture ขนาดจริงตามหน้าจอ
+     */
+    function captureReport(opts, callback) {
+        // รองรับ captureReport(callback) รูปแบบเดิม (ไม่ส่ง opts)
+        if (typeof opts === 'function') { callback = opts; opts = {}; }
+
+        const forPDF       = !!opts.forPDF;
+        const container    = document.getElementById('reportContainer');
+        const btnGroup     = document.querySelector('.btn-group');
+        const currentTheme = document.body.getAttribute('data-theme');
+
+        btnGroup.style.visibility = 'hidden';   // ซ่อนปุ่ม — filter-row ยังแสดง
+        const bgColor = currentTheme === 'dark' ? '#0f172a' : '#fef3c7';
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    html2canvas(container, {
+                        scale          : 2,
+                        useCORS        : true,
+                        allowTaint     : false,
+                        backgroundColor: bgColor,
+                        logging        : false,
+                        imageTimeout   : 0,
+                        removeContainer: true,
+                        onclone        : (clonedDoc) => {
+
+                            const s = clonedDoc.createElement('style');
+                            s.textContent = `
+                                *, *::before, *::after {
+                                    animation           : none !important;
+                                    animation-delay     : 0s   !important;
+                                    animation-duration  : 0s   !important;
+                                    animation-fill-mode : none !important;
+                                    transition          : none !important;
+                                }
+                                .bg-particles, .bg-dots,
+                                .loading-overlay, .notification,
+                                .btn-group, .date-input,
+                                #filterModeToggle { display: none !important; }
+
+                                #reportContainer,
+                                .header, .header-left, .header-title, .header-sub,
+                                .filter-row, .filter-item, .filter-label, .filter-icon,
+                                .date-badge, .shift-select,
+                                .dashboard-row, .stats-grid,
+                                .card, .card-label, .card-value,
+                                .chart-card, .chart-wrapper,
+                                .content-box, table, thead, tbody,
+                                tr, th, td, .badge, .text-fail-detail {
+                                    opacity   : 1 !important;
+                                    transform : none !important;
+                                    visibility: visible !important;
+                                }
+                                .filter-summary { display: none !important; }
+                                /* หน้าบันทึกรายงาน: ตัดเงา/ไฮไลต์ที่ html2canvas เรนเดอร์เป็นขอบขุ่น
+                                   ให้การ์ด+กรอบกราฟมีขอบคมสะอาด คงสีแบรนด์ทึบไว้ */
+                                .card, .chart-card {
+                                    box-shadow: none !important;
+                                }
+                                .card::after, .chart-card::before {
+                                    display: none !important;
+                                }
+                                .filter-row {
+                                    display       : flex !important;
+                                    margin-bottom : 14px !important;
+                                    gap           : 18px !important;
+                                    font-weight   : 700 !important;
+                                    font-size     : 0.9rem !important;
+                                    flex-wrap     : wrap !important;
+                                }
+                                .filter-item {
+                                    display     : flex !important;
+                                    align-items : center !important;
+                                    gap         : 6px !important;
+                                }
+
+                                ${forPDF ? `
+                                /* ══ A4 layout ══ */
+                                body { padding: 0 !important; margin: 0 !important; }
+                                #reportContainer {
+                                    max-width : ${A4_W_PX}px !important;
+                                    width     : ${A4_W_PX}px !important;
+                                    padding   : 10px 12px !important;
+                                    margin    : 0 !important;
+                                }
+                                .header {
+                                    padding       : 10px 14px !important;
+                                    border-radius : 12px !important;
+                                    margin-bottom : 8px !important;
+                                    gap           : 12px !important;
+                                }
+                                .header-title { font-size: 1rem !important; }
+                                .header-sub   { font-size: 0.68rem !important; }
+                                .filter-row {
+                                    font-size     : 0.78rem !important;
+                                    margin-bottom : 8px !important;
+                                    gap           : 12px !important;
+                                }
+                                .date-badge {
+                                    font-size : 0.75rem !important;
+                                    padding   : 3px 8px !important;
+                                }
+                                .shift-select { font-size: 0.78rem !important; padding: 3px 8px !important; }
+                                .dashboard-row {
+                                    grid-template-columns : 1fr 200px !important;
+                                    gap                   : 10px !important;
+                                    margin-bottom         : 10px !important;
+                                }
+                                .stats-grid {
+                                    grid-template-columns : repeat(2,1fr) !important;
+                                    gap : 8px !important;
+                                }
+                                .card         { padding: 10px 12px !important; border-radius: 10px !important; }
+                                .card-label   { font-size: 9px !important; }
+                                .card-value   { font-size: 30px !important; margin: 4px 0 2px !important; }
+                                .chart-card   { padding: 10px !important; min-height: 170px !important; border-radius: 10px !important; }
+                                .chart-wrapper{ width: 176px !important; height: 176px !important; }
+                                .content-box  { padding: 10px 12px !important; border-radius: 12px !important; overflow: visible !important; }
+                                table  { font-size: 9.5px !important; }
+                                th     { padding: 6px 7px !important; font-size: 9px !important; position: static !important; }
+                                td     { padding: 5px 7px !important; font-size: 9.5px !important; }
+                                .col-id     { width: 60px  !important; }
+                                .col-name   { width: 120px !important; }
+                                .col-score  { width: 44px  !important; }
+                                .col-pass   { width: 140px !important; }
+                                .col-fail   { width: 120px !important; }
+                                .col-note   { width: 85px  !important; }
+                                .col-status { width: 65px  !important; }
+                                .badge { padding: 3px 8px !important; font-size: 8px !important; }
+                                ` : ''}
+                            `;
+                            clonedDoc.head.appendChild(s);
+
+                            /* ── 2. copy live chart canvas bitmap → clone ── */
+                            const liveC  = document.getElementById('personalityChart');
+                            const cloneC = clonedDoc.getElementById('personalityChart');
+                            if (liveC && cloneC) {
+                                cloneC.width  = liveC.width;
+                                cloneC.height = liveC.height;
+                                cloneC.getContext('2d').drawImage(liveC, 0, 0);
+                            }
+                        }
+                    }).then(canvas => {
+                        btnGroup.style.visibility = 'visible';
+                        callback(null, canvas, bgColor);
+                    }).catch(err => {
+                        btnGroup.style.visibility = 'visible';
+                        callback(err, null, bgColor);
+                    });
+                }, 400);
+            });
+        });
+    }
+
+    /* ─── JPEG Export ─── */
+    function downloadJPG() {
+        showLoading();
+        captureReport({ forPDF: false }, (err, canvas) => {
+            hideLoading();
+            if (err) {
+                console.error('JPG export error:', err);
+                showNotification('❌ เกิดข้อผิดพลาดในการส่งออกภาพ', 'error');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = `Personality-Daily-Test-Report-${new Date().toISOString().slice(0, 10)}.jpg`;
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+            showNotification('✅ ส่งออก JPEG สำเร็จ', 'success');
+        });
+    }
+
+    /* ─── PDF / Print Export ────────────────────────────────────────
+       1. captureReport({ forPDF:true })
+          → onclone บีบ layout เป็น A4_W_PX ก่อน capture
+          → ได้ canvas ที่กว้าง A4_W_PX*2 (scale:2)
+       2. คำนวณ transform:scale ให้ภาพพอดีหน้า A4 เดียว
+       3. เปิด popup → print dialog → Save as PDF
+    ─────────────────────────────────────────────────────────────── */
+    function exportPDF() {
+        showLoading();
+        captureReport({ forPDF: true }, (err, canvas, bgColor) => {
+            hideLoading();
+            if (err) {
+                console.error('PDF export error:', err);
+                showNotification('❌ เกิดข้อผิดพลาดในการส่งออก PDF', 'error');
+                return;
+            }
+
+            const imgData = canvas.toDataURL('image/jpeg', 0.97);
+
+            /* canvas อยู่ที่ scale:2 → ขนาดจริง (CSS px) */
+            const realW = canvas.width  / 2;   // ≈ A4_W_PX
+            const realH = canvas.height / 2;
+
+            /*
+             * ใน popup: ตั้ง body เป็น 210mm × 297mm
+             * ใช้ CSS transform:scale เพื่อย่อภาพให้พอดีหน้าเดียว
+             * scale = min(A4_W / realW,  A4_H / realH)
+             */
+            const scaleW = A4_W_PX / realW;
+            const scaleH = A4_H_PX / realH;
+            const scale  = Math.min(scaleW, scaleH, 1).toFixed(6);  // ไม่ขยายเกิน 100%
+
+            /* ขนาด popup สำหรับ preview */
+            const prevW = Math.round(realW * Number(scale)) + 40;
+            const prevH = Math.min(Math.round(realH * Number(scale)) + 60, 920);
+
+            const win = window.open('', '_blank', `width=${prevW},height=${prevH},scrollbars=yes`);
+            if (!win) {
+                showNotification('⚠️ กรุณาอนุญาต Popup แล้วลองใหม่', 'error');
+                return;
+            }
+
+            win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>PERSONALITY DAILY TEST REPORT — ${new Date().toLocaleDateString('th-TH')}</title>
+<style>
+  /* ── screen preview ── */
+  @page { size: A4 portrait; margin: 0; }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html {
+    background: #e5e7eb;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    background: ${bgColor};
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page-wrap {
+    width       : ${realW}px;
+    height      : ${realH}px;
+    transform-origin: top left;
+    transform   : scale(${scale});
+    line-height : 0;
+  }
+  img {
+    display : block;
+    width   : ${realW}px;
+    height  : ${realH}px;
+  }
+  /* ── print: ภาพเต็มหน้า A4 ── */
+  @media print {
+    html  { background: ${bgColor} !important; }
+    body  {
+      width      : 210mm !important;
+      min-height : 297mm !important;
+      margin     : 0 !important;
+      overflow   : hidden !important;
+      background : ${bgColor} !important;
+    }
+    .page-wrap {
+      width          : 210mm !important;
+      height         : 297mm !important;
+      transform      : none !important;
+      transform-origin: top left !important;
+    }
+    img {
+      width    : 210mm !important;
+      height   : auto !important;
+      max-height: 297mm !important;
+      display  : block !important;
+      page-break-inside: avoid !important;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="page-wrap">
+    <img src="${imgData}" alt="PERSONALITY DAILY TEST REPORT">
+  </div>
+  <script>
+    window.onload = function() { setTimeout(function() { window.print(); }, 600); };
+  <\/script>
+</body>
+</html>`);
+            win.document.close();
+            showNotification('✅ กำลังเปิดหน้าพิมพ์ — เลือก "Save as PDF"', 'success');
+        });
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       GOOGLE SHEETS LIVE — ดึงข้อมูล real-time (polling)
+       แก้ URL ที่ SHEETS_API ที่เดียว (ลงท้าย /exec)
+    ════════════════════════════════════════════════════════════ */
+    let SHEETS_API = 'https://script.google.com/macros/s/AKfycbxOZWoargrxrlBa-Cp1ueu0rh6Xb6Sw8I8CFo1PY2upG_XawC6GosN5BuQ97m2XPWpw/exec';
+    // ถ้าเคยตั้ง URL ใหม่ไว้ ให้ใช้ตัวนั้น (กันต้องแก้โค้ดทุกครั้ง)
+    try { const _u = localStorage.getItem('sbk_sheets_api_v2'); if (_u && /\/exec/.test(_u)) SHEETS_API = _u; } catch (e) {}
+
+    /* แผงวิเคราะห์ปัญหาการเชื่อมต่อ — โผล่เมื่อเชื่อม Sheets ไม่ได้ */
+    function showDiagPanel(err) {
+        const inFrame = (window.self !== window.top);
+        let p = document.getElementById('sbkDiag');
+        if (!p) { p = document.createElement('div'); p.id = 'sbkDiag';
+            p.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:99999;max-width:380px;background:#1f2937;color:#f3f4f6;border:1px solid #374151;border-radius:14px;padding:15px 17px;box-shadow:0 12px 30px rgba(0,0,0,.45);font-family:Sarabun,sans-serif;font-size:13px;line-height:1.55;';
+            document.body.appendChild(p); }
+        const url = SHEETS_API;
+        p.innerHTML =
+            '<div style="font-weight:800;color:#f87171;margin-bottom:6px;">⚠️ เชื่อมต่อ Google Sheets ไม่ได้</div>' +
+            (inFrame
+              ? '<div style="background:#7f1d1d;padding:7px 10px;border-radius:8px;margin-bottom:8px;">กำลังเปิดใน <b>หน้าตัวอย่าง/iframe</b> ซึ่งบล็อกการเชื่อมต่อภายนอก<br>➜ <b>ดาวน์โหลดไฟล์แล้วเปิดในแท็บเบราว์เซอร์ปกติ</b> (ดับเบิลคลิกไฟล์)</div>'
+              : '<div style="margin-bottom:8px;">เปิดในเบราว์เซอร์ปกติแล้ว แต่ยังเชื่อม endpoint ไม่ได้ — กดปุ่มด้านล่างเพื่อทดสอบ และตรวจ Deploy=Web app/Anyone + Version ใหม่</div>') +
+            '<div style="font-size:11px;color:#9ca3af;word-break:break-all;margin-bottom:6px;">URL: ' + url + '</div>' +
+            '<div style="font-size:11px;color:#9ca3af;margin-bottom:10px;">JSONP: ' + ((err && err.jsonpError) || '-') + '<br>fetch: ' + ((err && err.fetchError) || '-') + '</div>' +
+            '<div style="display:flex;gap:7px;flex-wrap:wrap;">' +
+              '<button id="sbkDiagOpen" style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;">🔗 เปิด endpoint ทดสอบ</button>' +
+              '<button id="sbkDiagUrl" style="flex:1;background:#374151;color:#fff;border:none;border-radius:8px;padding:8px;cursor:pointer;font-weight:700;">✏️ ใส่ URL ใหม่</button>' +
+              '<button id="sbkDiagClose" style="background:#4b5563;color:#fff;border:none;border-radius:8px;padding:8px 10px;cursor:pointer;">✕</button>' +
+            '</div>';
+        p.querySelector('#sbkDiagOpen').onclick  = () => window.open(url, '_blank');
+        p.querySelector('#sbkDiagClose').onclick = () => p.remove();
+        p.querySelector('#sbkDiagUrl').onclick   = () => {
+            const u = prompt('วาง URL /exec ปัจจุบันของ Apps Script:', url);
+            if (u && /^https:\/\/script\.google\.com\/macros\/s\/.+\/exec/.test(u.trim())) {
+                SHEETS_API = u.trim();
+                try { localStorage.setItem('sbk_sheets_api_v2', SHEETS_API); } catch (e) {}
+                p.remove(); loadFromSheets(true);
+            } else if (u) { alert('URL ไม่ถูกต้อง ต้องลงท้ายด้วย /exec'); }
+        };
+    }
+    let autoTimer = null;
+    let allRows   = [];   // ข้อมูลทั้งหมดจากชีต (ก่อนกรองวันที่)
+
+    /* ── แปลงค่าวันที่ "รูปแบบใดก็ได้" → 'YYYY-MM-DD' (กันรูปแบบไม่ตรงทำข้อมูลหาย) ──
+       รองรับ: Date object, ISO, YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, ปี พ.ศ. (>2400 ลบ 543) */
+    function toISO(v) {
+        if (v === null || v === undefined) return '';
+        if (v instanceof Date && !isNaN(v.getTime())) {
+            return v.getFullYear() + '-' + String(v.getMonth()+1).padStart(2,'0') + '-' + String(v.getDate()).padStart(2,'0');
+        }
+        let str = String(v).trim();
+        if (!str) return '';
+        let m = str.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);          // YYYY-MM-DD
+        if (m) { let y=+m[1]; if (y>2400) y-=543; return y + '-' + String(+m[2]).padStart(2,'0') + '-' + String(+m[3]).padStart(2,'0'); }
+        m = str.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/);            // DD-MM-YYYY (ไทย)
+        if (m) { let d=+m[1], mo=+m[2], y=+m[3]; if (y<100) y+=2000; if (y>2400) y-=543;
+                 return y + '-' + String(mo).padStart(2,'0') + '-' + String(d).padStart(2,'0'); }
+        const t = Date.parse(str);                                            // ทางเลือกสุดท้าย
+        if (!isNaN(t)) { const d=new Date(t); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+        return str.slice(0, 10);
+    }
+    function rowDateKey(r) { return toISO(getVal(r, ['วันที่','วันที่ตรวจ','Date','date','บันทึกเมื่อ'])); }
+
+    /* ดึง JSON จาก Apps Script พร้อม timeout (กัน request ค้างทำให้ spinner ค้าง) */
+    /* ── JSONP: โหลดผ่าน <script> เลี่ยง CORS และ fetch-proxy (วิธีที่ทนทานสุดของ Apps Script) ── */
+    function jsonpRows(timeoutMs) {
+        return new Promise((resolve, reject) => {
+            const cb  = 'sbk_cb_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+            const sep = SHEETS_API.indexOf('?') >= 0 ? '&' : '?';
+            const script = document.createElement('script');
+            let done = false;
+            const cleanup = () => {
+                done = true;
+                try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+                if (script.parentNode) script.parentNode.removeChild(script);
+                clearTimeout(timer);
+            };
+            const timer = setTimeout(() => { if (!done) { cleanup(); reject(new Error('JSONP timeout')); } }, timeoutMs || 15000);
+            window[cb] = (data) => { if (done) return; cleanup(); resolve(data); };
+            script.onerror = () => { if (done) return; cleanup(); reject(new Error('JSONP load error')); };
+            script.src = SHEETS_API + sep + 'callback=' + cb + '&t=' + Date.now();
+            document.head.appendChild(script);
+        });
+    }
+    /* fetch สำรอง (เผื่อ JSONP ถูกบล็อก) — timeout ด้วย Promise.race */
+    function fetchRows(timeoutMs) {
+        let timer;
+        const timeout = new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('fetch timeout')), timeoutMs || 12000); });
+        return Promise.race([
+            fetch(SHEETS_API, { method: 'GET' }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+            timeout
+        ]).finally(() => clearTimeout(timer));
+    }
+    /* ลอง JSONP ก่อน → ถ้าพลาดค่อย fetch → ถ้ายังพลาดแจ้งให้เปิดในเบราว์เซอร์ปกติ */
+    async function fetchSheetRows() {
+        let data, jErr;
+        try { data = await jsonpRows(15000); }
+        catch (e1) {
+            jErr = e1;
+            try { data = await fetchRows(12000); }
+            catch (e2) {
+                const er = new Error('เชื่อมต่อ Google Sheets ไม่ได้ — เปิดไฟล์ในเบราว์เซอร์ปกติ และตรวจ Deploy=Web app/Anyone');
+                er.jsonpError = String((jErr && jErr.message) || jErr);
+                er.fetchError = String((e2 && e2.message) || e2);
+                throw er;
+            }
+        }
+        if (!data || data.ok === false) throw new Error((data && data.error) || 'รูปแบบข้อมูลไม่ถูกต้อง');
+        return (data.rows || []).filter(row => row && typeof row === 'object'
+            && Object.values(row).some(v => String(v).trim() !== ''));
+    }
+
+    /* showMsg=แสดง toast | silent=โหมด auto-load ตอนเปิด (ไม่เด้ง error รบกวน) */
+    let isLoading = false;   // กันการดึงข้อมูลซ้อนกัน (auto-refresh ชนกับกดเอง)
+    async function loadFromSheets(showMsg, silent) {
+        if (!SHEETS_API || SHEETS_API.indexOf('PASTE_YOUR') === 0) {
+            if (!silent) showNotification('⚠️ ยังไม่ได้ตั้งค่า URL — แก้ตัวแปร SHEETS_API ในไฟล์ก่อน', 'error');
+            return;
+        }
+        if (isLoading) return;   // มีการโหลดค้างอยู่ → ข้ามรอบนี้
+        isLoading = true;
+        try {
+            showLoading();
+            allRows = await fetchSheetRows();
+
+            if (allRows.length === 0) {
+                rawData = [];
+                document.getElementById('filterModeToggle').style.display = 'none';
+                renderTable([]); updateStats([]);
+                if (showMsg || !silent) showNotification('ℹ️ ยังไม่มีข้อมูลในชีต', 'success');
+                return;
+            }
+
+            // หา "วันล่าสุดที่มีข้อมูล" จากคีย์ที่ normalize แล้ว (เรียง YYYY-MM-DD = เรียงเวลา)
+            const dates  = allRows.map(rowDateKey).filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d));
+            const latest = dates.length ? dates.slice().sort().pop() : '';
+            const dateEl = document.getElementById('dateInput');
+            // ตั้งค่าเฉพาะเมื่อเป็นวันที่ถูกต้อง (กัน input เคลียร์ตัวเองเป็นค่าว่าง)
+            if (latest && dateEl) { dateEl.value = latest; onDateChange(latest, true); }
+
+            applyDateAndRender();
+            if (showMsg || !silent) {
+                const shown = dateEl && dateEl.value ? ('วันที่ ' + dateEl.value) : 'ทั้งหมด';
+                showNotification(`✅ ดึงข้อมูล ${allRows.length} รายการ (แสดง ${shown})`, 'success');
+            }
+        } catch (err) {
+            console.error('Sheets fetch error:', err);
+            // เด้ง error/diagnostic เฉพาะตอนผู้ใช้กดดึงเอง — auto-load ตอนเปิดจะเงียบ ไม่รบกวน
+            if (!silent) {
+                showNotification('❌ ดึงข้อมูลไม่สำเร็จ: ' + err.message, 'error');
+                showDiagPanel(err);
+            }
+        } finally {
+            hideLoading();
+            isLoading = false;
+        }
+    }
+
+    /* กรอง allRows ตามวันที่ที่เลือก → rawData แล้ว render
+       Fallback: ถ้าวันที่เลือกไม่ match แถวใดเลยทั้งที่มีข้อมูล → แสดงทั้งหมด (กัน "วันล่าสุดไม่แสดง") */
+    function applyDateAndRender() {
+        const sel = document.getElementById('dateInput');
+        const d   = sel && sel.value ? toISO(sel.value) : '';
+        rawData = d ? allRows.filter(r => rowDateKey(r) === d) : allRows.slice();
+
+        // กันรูปแบบวันที่เพี้ยน: เลือกวันแต่ไม่เจอ → ใช้วันล่าสุดที่มีจริง แล้วถ้ายังไม่เจอ → แสดงทั้งหมด
+        if (d && rawData.length === 0 && allRows.length > 0) {
+            const dates = allRows.map(rowDateKey).filter(x => /^\d{4}-\d{2}-\d{2}$/.test(x));
+            const latest = dates.length ? dates.slice().sort().pop() : '';
+            if (latest && latest !== d) {
+                if (sel) { sel.value = latest; onDateChange(latest, true); }
+                rawData = allRows.filter(r => rowDateKey(r) === latest);
+                showNotification(`ℹ️ ไม่พบข้อมูลวันที่ ${d} — สลับไปวันล่าสุด ${latest}`, 'success');
+            }
+            if (rawData.length === 0) {           // ยังว่าง → แสดงทั้งหมดไว้ก่อน
+                rawData = allRows.slice();
+                showNotification('ℹ️ รูปแบบวันที่ไม่ตรง — แสดงข้อมูลทั้งหมดแทน', 'success');
+            }
+        }
+
+        const base = rawData.length ? rawData[0] : (allRows.length ? allRows[0] : null);
+        const cols = base ? Object.keys(base) : [];
+        const hasShiftCol = cols.some(c =>
+            ['กะ','กะงาน','shift','กะการทำงาน'].map(normalizeKey).includes(normalizeKey(c))
+        );
+        document.getElementById('filterModeToggle').style.display = hasShiftCol ? 'flex' : 'none';
+        filterData();
+    }
+
+    function toggleAutoRefresh(on) {
+        const dot = document.getElementById('liveDot');
+        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }   // กัน interval ซ้อนเสมอ
+        if (on) {
+            loadFromSheets(true, true);                                  // โหลดทันทีแบบเงียบ
+            autoTimer = setInterval(() => loadFromSheets(false, true), 30000); // refresh ทุก 30 วิ (เงียบ ไม่เด้ง error)
+            if (dot) dot.style.display = 'inline';
+        } else {
+            if (dot) dot.style.display = 'none';
+        }
+    }
+
+    /* ── ตาข่ายกันพลาด: ดักทุก error/promise ที่หลุดมา ไม่ให้แอปค้างเงียบ ── */
+    window.addEventListener('error', function (ev) {
+        console.error('[Runtime error]', ev.error || ev.message);
+    });
+    window.addEventListener('unhandledrejection', function (ev) {
+        console.error('[Unhandled promise]', ev.reason);
+    });
+</script>
+
+<script>
+/* ══════ Splash + Auto-lock (กลับหน้าแรกเมื่อไม่ใช้งาน 1 นาที) ══════ */
+(function(){
+  try{
+    var IDLE_MS = 60000;            // 1 นาที
+    var splash  = document.getElementById('appSplash');
+    if(!splash) return;
+    var locked  = true;            // เริ่มต้นแสดง splash
+    var timer   = null;
+
+    function enter(){               // เข้าโปรแกรม
+      if(!locked) return;
+      locked = false;
+      splash.classList.add('hide');
+      resetIdle();
+    }
+    function lock(){                // กลับหน้าแรก (ซ่อนข้อมูล)
+      if(locked) return;
+      locked = true;
+      splash.classList.remove('hide');
+      try{ window.scrollTo(0,0); }catch(e){}
+      if(timer){ clearTimeout(timer); timer=null; }
+    }
+    function resetIdle(){
+      if(locked) return;
+      if(timer) clearTimeout(timer);
+      timer = setTimeout(lock, IDLE_MS);
+    }
+
+    // แตะ/คลิก/กดปุ่มบน splash = เข้าโปรแกรม
+    splash.addEventListener('click', enter);
+    splash.addEventListener('touchstart', function(e){ enter(); }, {passive:true});
+    splash.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' ') enter(); });
+
+    // กิจกรรมใด ๆ = รีเซ็ตตัวจับเวลา idle
+    ['mousemove','mousedown','keydown','touchstart','scroll','wheel','click'].forEach(function(ev){
+      window.addEventListener(ev, resetIdle, {passive:true});
+    });
+    // ซ่อนหน้าจอ (สลับแท็บ/พับจอ) แล้วกลับมา → ล็อกเพื่อความปลอดภัย
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden) lock();
+    });
+  }catch(err){ console.error('splash/idle error:', err); }
+})();
+</script>
+</body>
+</html>
